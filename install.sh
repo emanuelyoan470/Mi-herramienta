@@ -69,12 +69,15 @@ SELECTED_APP="${APPS[$((app_choice-1))]}"
 echo -e "${VERDE}[✔] Módulo seleccionado: $SELECTED_APP${NC}\n"
 
 # ==========================================
-# SELECCIÓN DE MODO DE RED
+# SELECCIÓN DE MODO DE RED (CON VALOR POR DEFECTO)
 # ==========================================
 echo -e "${BLANCO}[+] Selecciona el alcance de red:${NC}"
-echo -e "  ${AMARILLO}[1]${NC} Red Local (Accesible en tu Wi-Fi)"
-echo -e "  ${AMARILLO}[2]${NC} Servidor Local de Prueba (Localhost)"
-read -p ">> Selecciona modo (1-2): " net_choice
+echo -e "  ${AMARILLO}[1]${NC} Red Local (Accesible en tu Wi-Fi) [Por defecto]"
+echo -e "  ${AMARILLO}[2]${NC} Servidor Localhost (Solo este dispositivo)"
+read -p ">> Selecciona modo (1-2) [1]: " input_net
+
+# Si el usuario presiona Enter sin escribir nada, se asigna automáticamente '1'
+net_choice=${input_net:-1}
 
 # ==========================================
 # GENERACIÓN DE PÁGINA EN BLANCO Y SERVIDOR
@@ -86,7 +89,7 @@ cat << HTML > ~/mi_web/index.html
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>$SELECTED_APP - Servidor</title>
+    <title>Servidor - $SELECTED_APP</title>
     <style>
         body { background-color: #ffffff; margin: 0; padding: 0; }
     </style>
@@ -103,17 +106,17 @@ echo -e "${CYAN}==================================================${NC}"
 echo -e "${VERDE}[✔] SERVIDOR DESPLEGADO PARA: ${BLANCO}$SELECTED_APP${NC}"
 echo -e "${CYAN}==================================================${NC}\n"
 
-if [ "$net_choice" == "1" ]; then
-    IP_LOCAL=$(ifconfig 2>/dev/null | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
+if [ "$net_choice" == "2" ]; then
     echo -e "${BLANCO}Enlace local generado:${NC}"
+    echo -e "${AMARILLO}  http://localhost:8080${NC}\n"
+else
+    IP_LOCAL=$(ifconfig 2>/dev/null | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
+    echo -e "${BLANCO}Enlace de red generado:${NC}"
     echo -e "${AMARILLO}  http://localhost:8080${NC}"
     if [ -n "$IP_LOCAL" ]; then
         echo -e "${AMARILLO}  http://$IP_LOCAL:8080${NC} (Para dispositivos en tu misma red Wi-Fi)"
     fi
-else
-    echo -e "${BLANCO}Enlace generado:${NC}"
-    echo -e "${AMARILLO}  http://localhost:8080${NC}"
 fi
 
-echo -e "\n${BLANCO}Presiona Ctrl+C para finalizar la ejecución.${NC}\n"
+echo -e "\n${BLANCO}Presiona Ctrl+C para detener el servidor.${NC}\n"
 cd ~/mi_web && python3 -m http.server 8080
