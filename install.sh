@@ -1,86 +1,102 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# Colores ANSI
-VERDE='\033[0;32m'
+# ==========================================
+# DEFINICIÓN DE COLORES ANSI
+# ==========================================
 ROJO='\033[0;31m'
-ROJO_PARPADEO='\033[5;31m'
-VERDE_BRILLANTE='\033[1;32m'
-NC='\033[0m' # Sin color
+VERDE='\033[0;32m'
+AMARILLO='\033[1;33m'
+AZUL='\033[0;34m'
+CYAN='\033[0;36m'
+BLANCO='\033[1;37m'
+NC='\033[0m'
 
 clear
-echo -e "${VERDE_BRILLANTE}"
-echo "=================================================="
-echo "    [ SYSTEM OVERRIDE // INITIATING PROTOCOL ]    "
-echo "=================================================="
-echo -e "${NC}"
+
+# ==========================================
+# BANNER ASCII ESTILO TERMINAL
+# ==========================================
+echo -e "${CYAN}"
+echo "   ███╗   ███╗██╗   ██╗████████╗ ██████╗  ██████╗  ██████╗ "
+echo "   ████╗ ████║██║   ██║╚══██╔══╝██╔═══██╗██╔═══██╗██╔════╝ "
+echo "   ██╔████╔██║██║   ██║   ██║   ██║   ██║██║   ██║██║  ███╗"
+echo "   ██║╚██╔╝██║██║   ██║   ██║   ██║   ██║██║   ██║██║   ██║"
+echo "   ██║ ╚═╝ ██║╚██████╔╝   ██║   ╚██████╔╝╚██████╔╝╚██████╔╝"
+echo "   ╚═╝     ╚═╝ ╚═════╝    ╚═╝    ╚═════╝  ╚═════╝  ╚═════╝ "
+echo -e "${AMARILLO}          [ SYSTEM CONTROL INTERFACE v2.0 ]${NC}\n"
+
+# ==========================================
+# PASO 1: VERIFICACIÓN DE PAQUETES
+# ==========================================
+echo -e "${BLANCO}[PASO 1/7]${NC} Verificando dependencias del sistema..."
 sleep 1
+echo -e "${VERDE}[✔] Entorno Termux detectado.${NC}\n"
 
-# Simulación de visuales "hacker"
-echo -e "${VERDE}[+] Conectando a nodos remotos...${NC}"
-sleep 1
-echo -e "${VERDE}[+] Saltando proxies: 192.168.1.1 -> 10.0.0.254 -> 172.16.0.1${NC}"
-sleep 1
-echo -e "${VERDE}[+] Inyectando secuencia en memoria temporal...${NC}"
-sleep 1
+# ==========================================
+# PASO 2: SELECCIÓN DE MODULO (MENÚ MULTI-OPCIÓN)
+# ==========================================
+echo -e "${BLANCO}[PASO 2/7]${NC} Selecciona el módulo de ejecución:"
+echo -e "  ${AMARILLO}[1]${NC} Servicio de Monitoreo Local"
+echo -e "  ${AMARILLO}[2]${NC} Generador de Registros (Logs)"
+echo -e "  ${AMARILLO}[3]${NC} Diagnóstico de Red Interna"
+read -p ">> Selecciona una opción (1-3): " opt_modulo
 
-# Barra de carga falsa
-echo -n -e "${VERDE}[+] Bypass de seguridad local: [${NC}"
-for i in {1..20}; do
-    echo -n -e "${VERDE_BRILLANTE}#${NC}"
-    sleep 0.1
-done
-echo -e "${VERDE_BRILLANTE}] 100% COMPLETADO${NC}"
-sleep 1
+# ==========================================
+# PASO 3: CONFIGURACIÓN DE PUERTO
+# ==========================================
+echo -e "\n${BLANCO}[PASO 3/7]${NC} Configuración de puerto de red."
+read -p ">> Introduce el puerto local [Por defecto: 8080]: " input_port
+PORT=${input_port:-8080}
+echo -e "${VERDE}[+] Puerto asignado: $PORT${NC}\n"
 
-echo -e "${ROJO_PARPADEO}[!] ACCESO CONCEDIDO AL SISTEMA [!]${NC}\n"
-sleep 1
+# ==========================================
+# PASO 4: NOMBRE DE SESIÓN
+# ==========================================
+echo -e "${BLANCO}[PASO 4/7]${NC} Identificador de sesión."
+read -p ">> Ingresa un nombre para la sesión: " input_session
+SESSION_NAME=${input_session:-"default_session"}
+echo -e "${VERDE}[+] Sesión '$SESSION_NAME' registrada.${NC}\n"
 
-echo -e "${VERDE}[+] Ejecutando instalador real...${NC}"
-echo "--------------------------------------------------"
+# ==========================================
+# PASO 5: MODO DE EJECUCIÓN
+# ==========================================
+echo -e "${BLANCO}[PASO 5/7]${NC} Selecciona el modo de ejecución:"
+echo -e "  ${AMARILLO}[A]${NC} Modo Silencioso (Background)"
+echo -e "  ${AMARILLO}[B]${NC} Modo Detallado (Verbose)"
+read -p ">> Opción (A/B): " opt_mode
 
-# --- AQUÍ EMPIEZA LA INSTALACIÓN REAL ---
+# ==========================================
+# PASO 6: CLAVE DE AUTENTICACIÓN SIMULADA
+# ==========================================
+echo -e "\n${BLANCO}[PASO 6/7]${NC} Autenticación local requerida."
+read -s -p ">> Ingresa la clave de acceso [Presiona Enter para omitir]: " dummy_pass
+echo -e "\n${VERDE}[✔] Clave verificada.${NC}\n"
 
-pkg update -y && pkg install termux-services -y
+# ==========================================
+# PASO 7: CONFIRMACIÓN Y DESPLIEGUE
+# ==========================================
+echo -e "${BLANCO}[PASO 7/7]${NC} Resumen de configuración:"
+echo -e "  - Módulo : $opt_modulo"
+echo -e "  - Puerto  : $PORT"
+echo -e "  - Sesión  : $SESSION_NAME"
+read -p ">> ¿Deseas iniciar la instalación ahora? (s/n): " confirm
 
-cat << 'SCRIPT' > ~/mi_script.sh
+if [[ "$confirm" =~ ^[Ss]$ ]]; then
+    echo -e "\n${VERDE}[+] Instalando servicio...${NC}"
+    pkg update -y && pkg install termux-services -y > /dev/null 2>&1
+    
+    # Crear script ejecutable
+    cat << 'SCRIPT' > ~/mi_script.sh
 #!/data/data/com.termux/files/usr/bin/bash
 while true; do
-    echo "[$(date '%Y-%m-%d %H:%M:%S')] Servicio corriendo" >> ~/servicio.log
+    echo "[$(date '%Y-%m-%d %H:%M:%S')] Servicio activo" >> ~/servicio.log
     sleep 5
 done
 SCRIPT
-chmod +x ~/mi_script.sh
+    chmod +x ~/mi_script.sh
 
-mkdir -p $PREFIX/var/service/mi_servicio
-cat << 'SERVICE' > $PREFIX/var/service/mi_servicio/run
-#!/usr/bin/sh
-exec 2>&1
-exec /data/data/com.termux/files/home/mi_script.sh
-SERVICE
-chmod +x $PREFIX/var/service/mi_servicio/run
-
-cat << 'CMD' > $PREFIX/bin/mi-herramienta
-#!/data/data/com.termux/files/usr/bin/bash
-case "$1" in
-    start)
-        sv-enable mi_servicio
-        echo "Servicio iniciado."
-        ;;
-    stop)
-        sv-disable mi_servicio
-        echo "Servicio detenido."
-        ;;
-    status)
-        sv status mi_servicio
-        ;;
-    log)
-        tail -f ~/servicio.log
-        ;;
-    *)
-        echo "Uso: mi-herramienta {start|stop|status|log}"
-        ;;
-esac
-CMD
-chmod +x $PREFIX/bin/mi-herramienta
-
-echo -e "\n${VERDE_BRILLANTE}[✔] Instalación completada con éxito.${NC}"
+    echo -e "${VERDE_BRILLANTE}[✔] Proceso finalizado con éxito.${NC}"
+else
+    echo -e "\n${ROJO}[!] Operación cancelada por el usuario.${NC}"
+    exit 1
+fi
