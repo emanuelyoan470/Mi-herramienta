@@ -285,3 +285,42 @@ get_html() {
         *) echo "Aplicación no soportada" ;;
     esac
 }
+
+# ============================================
+# MENÚ INTERACTIVO Y LANZADOR DEL SERVIDOR
+# ============================================
+
+echo -e "${VERDE}[?] Selecciona una opción:${NC}"
+echo -e "${AMARILLO}1)${BLANCO} Roblox"
+echo -e "${AMARILLO}2)${BLANCO} Free Fire"
+echo -e "${AMARILLO}3)${BLANCO} TikTok"
+echo -e "${AMARILLO}4)${BLANCO} Facebook"
+echo -e "${AMARILLO}5)${BLANCO} Instagram"
+echo -e "${AMARILLO}6)${BLANCO} WhatsApp"
+echo -e "${AMARILLO}7)${BLANCO} YouTube"
+echo -e "${AMARILLO}8)${BLANCO} Minecraft"
+echo -e "${AMARILLO}9)${BLANCO} PUBG Mobile"
+echo -n -e "\n${CYAN}>> ${NC}"
+read opcion
+
+app_seleccionada=""
+case $opcion in
+    1) app_seleccionada="Roblox" ;;
+    2) app_seleccionada="Free Fire" ;;
+    3) app_seleccionada="TikTok" ;;
+    4) app_seleccionada="Facebook" ;;
+    5) app_seleccionada="Instagram" ;;
+    6) app_seleccionada="WhatsApp" ;;
+    7) app_seleccionada="YouTube" ;;
+    8) app_seleccionada="Minecraft" ;;
+    9) app_seleccionada="PUBG Mobile" ;;
+    *) echo -e "${ROJO}[!] Opción inválida.${NC}"; exit 1 ;;
+esac
+
+mkdir -p www
+get_html "$app_seleccionada" > www/index.html
+
+echo -e "${VERDE}[+] Plantilla generada para: ${AMARILLO}$app_seleccionada${NC}"
+echo -e "${VERDE}[+] Iniciando servidor web local en el puerto 8080...${NC}"
+cd www
+python3 -m http.server 8080
