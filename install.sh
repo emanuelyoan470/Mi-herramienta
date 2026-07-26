@@ -64,7 +64,7 @@ mostrar_menu() {
 }
 
 # ============================================
-# GENERAR APK CON AAPT (COMPILADOR REAL)
+# GENERAR APK (VERSIÓN QUE FUNCIONA)
 # ============================================
 generar_apk() {
     local app="$1"
@@ -76,8 +76,7 @@ generar_apk() {
     # ============================================
     # PASO 1: INSTALAR HERRAMIENTAS
     # ============================================
-    echo -e "${AMARILLO}[*] Instalando herramientas...${NC}"
-    pkg install aapt dx apksigner openjdk-17 wget zip -y 2>/dev/null
+    pkg install apktool apksigner wget zip -y 2>/dev/null
     
     # ============================================
     # PASO 2: CREAR CARPETA
@@ -87,15 +86,12 @@ generar_apk() {
     rm -rf *
     
     # ============================================
-    # PASO 3: CREAR ESTRUCTURA
+    # PASO 3: CREAR APK BASE
     # ============================================
-    echo -e "${AMARILLO}[*] Creando estructura...${NC}"
+    echo -e "${AMARILLO}[*] Creando APK base...${NC}"
     
-    mkdir -p src/com/block/$app
-    mkdir -p res/layout
-    mkdir -p res/values
-    mkdir -p res/drawable
-    mkdir -p META-INF
+    mkdir -p base_apk
+    cd base_apk
     
     # AndroidManifest.xml
     cat > AndroidManifest.xml << EOF
@@ -125,6 +121,7 @@ generar_apk() {
 EOF
 
     # Layout
+    mkdir -p res/layout
     cat > res/layout/main.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -194,6 +191,7 @@ EOF
 EOF
 
     # Strings
+    mkdir -p res/values
     cat > res/values/strings.xml << EOF
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
@@ -202,9 +200,9 @@ EOF
 EOF
 
     # ============================================
-    # PASO 4: DESCARGAR ICONO
+    # PASO 4: ICONO
     # ============================================
-    echo -e "${AMARILLO}[*] Descargando icono...${NC}"
+    mkdir -p res/drawable
     ICON_URL=$(get_icon_url "$app")
     wget -q -O icon.png "$ICON_URL" 2>/dev/null
     
@@ -215,121 +213,141 @@ EOF
     rm -f icon.png
 
     # ============================================
-    # PASO 5: CÓDIGO JAVA
+    # PASO 5: SMALI (CÓDIGO COMPILADO)
     # ============================================
-    cat > src/com/block/$app/MainActivity.java << EOF
-package com.block.$app;
+    mkdir -p smali/com/block/$app
+    
+    cat > smali/com/block/$app/MainActivity.smali << EOF
+.class public Lcom/block/$app/MainActivity;
+.super Landroid/app/Activity;
+.source "MainActivity.java"
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+.field private codigoInput:Landroid/widget/EditText;
+.field private errorText:Landroid/widget/TextView;
+.field private CODIGO_CORRECTO:Ljava/lang/String;
 
-public class MainActivity extends Activity {
-    private EditText codigoInput;
-    private TextView errorText;
-    private String CODIGO_CORRECTO = "$codigo";
+.method public constructor <init>()V
+    .registers 2
+    invoke-direct {p0}, Landroid/app/Activity;-><init>()V
+    const-string v0, "$codigo"
+    iput-object v0, p0, Lcom/block/$app/MainActivity;->CODIGO_CORRECTO:Ljava/lang/String;
+    return-void
+.end method
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        
-        codigoInput = findViewById(R.id.codigo);
-        errorText = findViewById(R.id.error);
-        Button btn = findViewById(R.id.desbloquear);
-        
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String codigo = codigoInput.getText().toString().trim();
-                if (codigo.isEmpty()) {
-                    errorText.setText("Ingresa el código");
-                } else if (codigo.equals(CODIGO_CORRECTO)) {
-                    errorText.setText("✅ ¡DESBLOQUEADO!");
-                    finish();
-                } else {
-                    errorText.setText("❌ Código incorrecto");
-                }
-            }
-        });
-    }
-}
+.method protected onCreate(Landroid/os/Bundle;)V
+    .registers 5
+    invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
+    const p1, 0x7f030001
+    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->setContentView(I)V
+    
+    invoke-virtual {p0}, Lcom/block/$app/MainActivity;->getWindow()Landroid/view/Window;
+    move-result-object p1
+    const/16 v0, 0x400
+    invoke-virtual {p1, v0, v0}, Landroid/view/Window;->setFlags(II)V
+    
+    const p1, 0x7f070001
+    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
+    move-result-object p1
+    check-cast p1, Landroid/widget/EditText;
+    iput-object p1, p0, Lcom/block/$app/MainActivity;->codigoInput:Landroid/widget/EditText;
+    
+    const p1, 0x7f080001
+    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
+    move-result-object p1
+    check-cast p1, Landroid/widget/TextView;
+    iput-object p1, p0, Lcom/block/$app/MainActivity;->errorText:Landroid/widget/TextView;
+    
+    const p1, 0x7f060001
+    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
+    move-result-object p1
+    check-cast p1, Landroid/widget/Button;
+    
+    new-instance v0, Lcom/block/$app/MainActivity$1;
+    invoke-direct {v0, p0}, Lcom/block/$app/MainActivity$1;-><init>(Lcom/block/$app/MainActivity;)V
+    invoke-virtual {p1, v0}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+    return-void
+.end method
+
+.method private verificar()V
+    .registers 4
+    iget-object v0, p0, Lcom/block/$app/MainActivity;->codigoInput:Landroid/widget/EditText;
+    invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
+    move-result-object v0
+    invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
+    move-result-object v0
+    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
+    move-result-object v0
+    
+    invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
+    move-result v1
+    if-eqz v1, :cond_1d
+    iget-object v0, p0, Lcom/block/$app/MainActivity;->errorText:Landroid/widget/TextView;
+    const-string v1, "Ingresa el c\u00f3digo"
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+    return-void
+    
+    :cond_1d
+    iget-object v1, p0, Lcom/block/$app/MainActivity;->CODIGO_CORRECTO:Ljava/lang/String;
+    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-eqz v0, :cond_37
+    iget-object v0, p0, Lcom/block/$app/MainActivity;->errorText:Landroid/widget/TextView;
+    const-string v1, "✅ \u00a1DESBLOQUEADO!"
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+    const-wide/16 v0, 0x7d0
+    invoke-static {v0, v1}, Landroid/os/SystemClock;->sleep(J)V
+    invoke-virtual {p0}, Lcom/block/$app/MainActivity;->finish()V
+    goto :goto_41
+    
+    :cond_37
+    iget-object v0, p0, Lcom/block/$app/MainActivity;->errorText:Landroid/widget/TextView;
+    const-string v1, "❌ C\u00f3digo incorrecto"
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+    :goto_41
+    return-void
+.end method
+EOF
+
+    # Clase interna
+    cat >> smali/com/block/$app/MainActivity.smali << 'EOF'
+
+.class Lcom/block/$app/MainActivity$1;
+.super Ljava/lang/Object;
+.implements Landroid/view/View$OnClickListener;
+.source "MainActivity.java"
+
+# instance fields
+.field final synthetic this$0:Lcom/block/$app/MainActivity;
+
+# direct methods
+.method constructor <init>(Lcom/block/$app/MainActivity;)V
+    .registers 2
+    iput-object p1, p0, Lcom/block/$app/MainActivity$1;->this$0:Lcom/block/$app/MainActivity;
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+    return-void
+.end method
+
+.method public onClick(Landroid/view/View;)V
+    .registers 3
+    iget-object p1, p0, Lcom/block/$app/MainActivity$1;->this$0:Lcom/block/$app/MainActivity;
+    invoke-direct {p1}, Lcom/block/$app/MainActivity;->verificar()V
+    return-void
+.end method
 EOF
 
     # ============================================
-    # PASO 6: COMPILAR CON AAPT
+    # PASO 6: RECOMPILAR
     # ============================================
-    echo -e "${AMARILLO}[*] Compilando recursos...${NC}"
+    cd ..
     
-    # Buscar android.jar
-    ANDROID_JAR=$(find /data/data/com.termux/files -name "android.jar" 2>/dev/null | head -1)
+    echo -e "${AMARILLO}[*] Recompilando APK...${NC}"
+    apktool b base_apk -o app_unsigned.apk 2>/dev/null
     
-    if [ -z "$ANDROID_JAR" ] || [ ! -f "$ANDROID_JAR" ]; then
-        # Descargar android.jar si no existe
-        echo -e "${AMARILLO}[*] Descargando android.jar...${NC}"
-        mkdir -p ~/android-sdk/platforms/android-33/
-        wget -q -O ~/android-sdk/platforms/android-33/android.jar "https://raw.githubusercontent.com/emanuelyoan470/Mi-herramienta/main/android.jar" 2>/dev/null
-        ANDROID_JAR=~/android-sdk/platforms/android-33/android.jar
-    fi
-    
-    if [ -f "$ANDROID_JAR" ]; then
-        echo -e "${VERDE}[✔] android.jar encontrado${NC}"
-        
-        # Compilar recursos
-        aapt package -f -m -J src -M AndroidManifest.xml -S res -I "$ANDROID_JAR" 2>/dev/null
-        
-        if [ $? -eq 0 ]; then
-            echo -e "${VERDE}[✔] Recursos compilados${NC}"
-        else
-            echo -e "${ROJO}[!] Error compilando recursos${NC}"
-        fi
-        
-        # Compilar Java
-        echo -e "${AMARILLO}[*] Compilando Java...${NC}"
-        javac -cp "$ANDROID_JAR" -d . src/com/block/$app/*.java 2>/dev/null
-        
-        if [ $? -eq 0 ]; then
-            echo -e "${VERDE}[✔] Java compilado${NC}"
-        else
-            echo -e "${ROJO}[!] Error compilando Java${NC}"
-        fi
-        
-        # Crear DEX
-        echo -e "${AMARILLO}[*] Creando DEX...${NC}"
-        dx --dex --output=classes.dex . 2>/dev/null
-        
-        if [ -f "classes.dex" ]; then
-            echo -e "${VERDE}[✔] DEX creado${NC}"
-        fi
-        
-        # Empaquetar
-        echo -e "${AMARILLO}[*] Empaquetando APK...${NC}"
-        aapt package -f -M AndroidManifest.xml -S res -I "$ANDROID_JAR" -F app_unsigned.apk . 2>/dev/null
-        
-        if [ -f "classes.dex" ]; then
-            zip app_unsigned.apk classes.dex 2>/dev/null
-        fi
-        
-        # Si falla, usar método alternativo
-        if [ ! -f "app_unsigned.apk" ]; then
-            echo -e "${AMARILLO}[*] Usando método alternativo...${NC}"
-            zip -r app_unsigned.apk AndroidManifest.xml res/ META-INF/ 2>/dev/null
-            if [ -f "classes.dex" ]; then
-                zip app_unsigned.apk classes.dex 2>/dev/null
-            fi
-        fi
-    else
-        echo -e "${ROJO}[!] No se encontró android.jar${NC}"
-        echo -e "${AMARILLO}[*] Creando APK simple...${NC}"
-        
-        # Crear APK simple con zip
-        zip -r app_unsigned.apk AndroidManifest.xml res/ META-INF/ 2>/dev/null
+    if [ ! -f "app_unsigned.apk" ]; then
+        echo -e "${AMARILLO}[*] Usando método alternativo...${NC}"
+        cd base_apk
+        zip -r ../app_unsigned.apk * 2>/dev/null
+        cd ..
     fi
 
     # ============================================
@@ -371,8 +389,8 @@ EOF
         echo -e "${VERDE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
     else
         echo -e "\n${ROJO}[!] ERROR: No se pudo generar la APK${NC}"
-        echo -e "${AMARILLO}[*] Asegúrate de tener conexión a internet${NC}"
-        echo -e "${AMARILLO}[*] Ejecuta: pkg install aapt dx apksigner openjdk-17 -y${NC}"
+        echo -e "${AMARILLO}[*] Instalando herramientas manualmente...${NC}"
+        pkg install apktool apksigner wget zip openjdk-17 -y
         cd ~
         rm -rf ~/block_temp
     fi
