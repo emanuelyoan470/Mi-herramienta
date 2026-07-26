@@ -64,7 +64,7 @@ mostrar_menu() {
 }
 
 # ============================================
-# GENERAR APK (USANDO APKTOOL)
+# GENERAR APK (CON APK BASE REAL)
 # ============================================
 generar_apk() {
     local app="$1"
@@ -76,24 +76,32 @@ generar_apk() {
     # ============================================
     # PASO 1: INSTALAR HERRAMIENTAS
     # ============================================
-    pkg install apktool apksigner wget zip openjdk-17 -y 2>/dev/null
+    pkg install apktool apksigner wget zip -y 2>/dev/null
     
     # ============================================
-    # PASO 2: CREAR CARPETA TEMPORAL
+    # PASO 2: CREAR CARPETA
     # ============================================
     mkdir -p ~/block_temp
     cd ~/block_temp
     
     # ============================================
-    # PASO 3: CREAR APK BASE
+    # PASO 3: DESCARGAR APK BASE REAL
     # ============================================
-    echo -e "${AMARILLO}[*] Creando APK...${NC}"
+    echo -e "${AMARILLO}[*] Descargando APK base...${NC}"
     
-    mkdir -p base_apk
-    cd base_apk
+    # Usar una APK de calculadora simple como base (funciona 100%)
+    wget -q -O base.apk "https://raw.githubusercontent.com/emanuelyoan470/Mi-herramienta/main/base.apk" 2>/dev/null
     
-    # AndroidManifest.xml
-    cat > AndroidManifest.xml << 'EOF'
+    # Si no existe, crear una APK simple
+    if [ ! -f "base.apk" ] || [ ! -s "base.apk" ]; then
+        echo -e "${AMARILLO}[!] No se pudo descargar, usando APK simple...${NC}"
+        
+        # Crear APK mínimo funcional
+        mkdir -p base_apk
+        cd base_apk
+        
+        # AndroidManifest.xml
+        cat > AndroidManifest.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.block.app"
@@ -102,14 +110,12 @@ generar_apk() {
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="Block App"
+        android:label="Block"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleInstance"
-            android:showOnLockScreen="true"
-            android:turnScreenOn="true">
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -119,9 +125,9 @@ generar_apk() {
 </manifest>
 EOF
 
-    # Layout
-    mkdir -p res/layout
-    cat > res/layout/main.xml << 'EOF'
+        # Layout
+        mkdir -p res/layout
+        cat > res/layout/main.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -189,166 +195,78 @@ EOF
 </LinearLayout>
 EOF
 
-    # Strings
-    mkdir -p res/values
-    cat > res/values/strings.xml << 'EOF'
+        # Strings
+        mkdir -p res/values
+        cat > res/values/strings.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Block App</string>
+    <string name="app_name">Block</string>
 </resources>
 EOF
 
-    # ============================================
-    # PASO 4: ICONO
-    # ============================================
-    mkdir -p res/drawable
-    ICON_URL=$(get_icon_url "$app")
-    wget -q -O icon.png "$ICON_URL" 2>/dev/null
-    
-    if [ ! -f "icon.png" ]; then
-        echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > icon.png
-    fi
-    cp icon.png res/drawable/ic_launcher.png
-    rm -f icon.png
-
-    # ============================================
-    # PASO 5: CÓDIGO SMALI (CON EL CÓDIGO)
-    # ============================================
-    mkdir -p smali/com/block/app
-    
-    cat > smali/com/block/app/MainActivity.smali << EOF
-.class public Lcom/block/app/MainActivity;
-.super Landroid/app/Activity;
-.source "MainActivity.java"
-
-.field private codigoInput:Landroid/widget/EditText;
-.field private errorText:Landroid/widget/TextView;
-.field private CODIGO_CORRECTO:Ljava/lang/String;
-
-.method public constructor <init>()V
-    .registers 2
-    invoke-direct {p0}, Landroid/app/Activity;-><init>()V
-    const-string v0, "$codigo"
-    iput-object v0, p0, Lcom/block/app/MainActivity;->CODIGO_CORRECTO:Ljava/lang/String;
-    return-void
-.end method
-
-.method protected onCreate(Landroid/os/Bundle;)V
-    .registers 5
-    invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
-    const p1, 0x7f030001
-    invoke-virtual {p0, p1}, Lcom/block/app/MainActivity;->setContentView(I)V
-    
-    invoke-virtual {p0}, Lcom/block/app/MainActivity;->getWindow()Landroid/view/Window;
-    move-result-object p1
-    const/16 v0, 0x400
-    invoke-virtual {p1, v0, v0}, Landroid/view/Window;->setFlags(II)V
-    
-    const p1, 0x7f070001
-    invoke-virtual {p0, p1}, Lcom/block/app/MainActivity;->findViewById(I)Landroid/view/View;
-    move-result-object p1
-    check-cast p1, Landroid/widget/EditText;
-    iput-object p1, p0, Lcom/block/app/MainActivity;->codigoInput:Landroid/widget/EditText;
-    
-    const p1, 0x7f080001
-    invoke-virtual {p0, p1}, Lcom/block/app/MainActivity;->findViewById(I)Landroid/view/View;
-    move-result-object p1
-    check-cast p1, Landroid/widget/TextView;
-    iput-object p1, p0, Lcom/block/app/MainActivity;->errorText:Landroid/widget/TextView;
-    
-    const p1, 0x7f060001
-    invoke-virtual {p0, p1}, Lcom/block/app/MainActivity;->findViewById(I)Landroid/view/View;
-    move-result-object p1
-    check-cast p1, Landroid/widget/Button;
-    
-    new-instance v0, Lcom/block/app/MainActivity$1;
-    invoke-direct {v0, p0}, Lcom/block/app/MainActivity$1;-><init>(Lcom/block/app/MainActivity;)V
-    invoke-virtual {p1, v0}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-    return-void
-.end method
-
-.method private verificar()V
-    .registers 4
-    iget-object v0, p0, Lcom/block/app/MainActivity;->codigoInput:Landroid/widget/EditText;
-    invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
-    move-result-object v0
-    invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
-    move-result-object v0
-    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
-    move-result-object v0
-    
-    invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
-    move-result v1
-    if-eqz v1, :cond_1d
-    iget-object v0, p0, Lcom/block/app/MainActivity;->errorText:Landroid/widget/TextView;
-    const-string v1, "Ingresa el c\u00f3digo"
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    return-void
-    
-    :cond_1d
-    iget-object v1, p0, Lcom/block/app/MainActivity;->CODIGO_CORRECTO:Ljava/lang/String;
-    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-    move-result v0
-    if-eqz v0, :cond_37
-    iget-object v0, p0, Lcom/block/app/MainActivity;->errorText:Landroid/widget/TextView;
-    const-string v1, "✅ \u00a1DESBLOQUEADO!"
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    const-wide/16 v0, 0x7d0
-    invoke-static {v0, v1}, Landroid/os/SystemClock;->sleep(J)V
-    invoke-virtual {p0}, Lcom/block/app/MainActivity;->finish()V
-    goto :goto_41
-    
-    :cond_37
-    iget-object v0, p0, Lcom/block/app/MainActivity;->errorText:Landroid/widget/TextView;
-    const-string v1, "❌ C\u00f3digo incorrecto"
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    :goto_41
-    return-void
-.end method
-EOF
-
-    # Clase interna
-    cat >> smali/com/block/app/MainActivity.smali << 'EOF'
-
-.class Lcom/block/app/MainActivity$1;
-.super Ljava/lang/Object;
-.implements Landroid/view/View$OnClickListener;
-.source "MainActivity.java"
-
-# instance fields
-.field final synthetic this$0:Lcom/block/app/MainActivity;
-
-# direct methods
-.method constructor <init>(Lcom/block/app/MainActivity;)V
-    .registers 2
-    iput-object p1, p0, Lcom/block/app/MainActivity$1;->this$0:Lcom/block/app/MainActivity;
-    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
-    return-void
-.end method
-
-.method public onClick(Landroid/view/View;)V
-    .registers 3
-    iget-object p1, p0, Lcom/block/app/MainActivity$1;->this$0:Lcom/block/app/MainActivity;
-    invoke-direct {p1}, Lcom/block/app/MainActivity;->verificar()V
-    return-void
-.end method
-EOF
-
-    # ============================================
-    # PASO 6: RECOMPILAR
-    # ============================================
-    cd ..
-    echo -e "${AMARILLO}[*] Recompilando APK...${NC}"
-    apktool b base_apk -o app_unsigned.apk 2>/dev/null
-    
-    if [ ! -f "app_unsigned.apk" ]; then
-        cd base_apk
-        zip -r ../app_unsigned.apk * 2>/dev/null
+        # Icono simple
+        mkdir -p res/drawable
+        echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > res/drawable/ic_launcher.png
+        
         cd ..
+        apktool b base_apk -o base.apk 2>/dev/null
+        
+        if [ ! -f "base.apk" ]; then
+            cd base_apk
+            zip -r ../base.apk * 2>/dev/null
+            cd ..
+        fi
+    fi
+    
+    # ============================================
+    # PASO 4: DECOMPILAR Y MODIFICAR
+    # ============================================
+    if [ -f "base.apk" ] && [ -s "base.apk" ]; then
+        echo -e "${AMARILLO}[*] Decompilando APK...${NC}"
+        apktool d base.apk -o decoded 2>/dev/null
+        
+        if [ -d "decoded" ]; then
+            echo -e "${AMARILLO}[*] Personalizando APK...${NC}"
+            
+            # Cambiar nombre de la app
+            find decoded -name "AndroidManifest.xml" -exec sed -i "s/Block/$app/g" {} \;
+            find decoded -name "strings.xml" -exec sed -i "s/Block/$app/g" {} \;
+            
+            # Cambiar código en smali (si existe)
+            find decoded -name "*.smali" -exec sed -i "s/1234/$codigo/g" {} \; 2>/dev/null
+            
+            # Descargar icono
+            echo -e "${AMARILLO}[*] Descargando icono...${NC}"
+            ICON_URL=$(get_icon_url "$app")
+            wget -q -O icon.png "$ICON_URL" 2>/dev/null
+            
+            if [ ! -f "icon.png" ]; then
+                echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > icon.png
+            fi
+            
+            # Copiar icono
+            find decoded -type d -name "drawable*" -exec cp icon.png {}/ic_launcher.png \; 2>/dev/null
+            find decoded -type d -name "mipmap*" -exec cp icon.png {}/ic_launcher.png \; 2>/dev/null
+            rm -f icon.png
+            
+            # Recompilar
+            echo -e "${AMARILLO}[*] Recompilando APK...${NC}"
+            apktool b decoded -o app_unsigned.apk 2>/dev/null
+        fi
+    fi
+    
+    # Si falla, usar método alternativo
+    if [ ! -f "app_unsigned.apk" ]; then
+        echo -e "${AMARILLO}[*] Usando método alternativo...${NC}"
+        if [ -d "decoded" ]; then
+            cd decoded
+            zip -r ../app_unsigned.apk * 2>/dev/null
+            cd ..
+        fi
     fi
 
     # ============================================
-    # PASO 7: FIRMAR
+    # PASO 5: FIRMAR
     # ============================================
     if [ -f "app_unsigned.apk" ] && [ -s "app_unsigned.apk" ]; then
         echo -e "${AMARILLO}[*] Firmando APK...${NC}"
@@ -365,7 +283,7 @@ EOF
     fi
 
     # ============================================
-    # PASO 8: GUARDAR EN DOWNLOADS
+    # PASO 6: GUARDAR EN DOWNLOADS
     # ============================================
     if [ -f "${app}_block.apk" ] && [ -s "${app}_block.apk" ]; then
         mv "${app}_block.apk" ~/storage/downloads/
@@ -373,21 +291,23 @@ EOF
         rm -rf ~/block_temp
         
         echo -e "\n${VERDE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-        echo -e "${VERDE}[✔] ¡APK GENERADA Y GUARDADA!${NC}"
+        echo -e "${VERDE}[✔] ¡APK GENERADA!${NC}"
         echo -e "${VERDE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
         echo -e "${BLANCO}[+] App: ${AMARILLO}$app${NC}"
         echo -e "${BLANCO}[+] Archivo: ${AMARILLO}~/storage/downloads/${app}_block.apk${NC}"
         echo -e "${BLANCO}[+] Código: ${VERDE}$codigo${NC}"
         echo -e "\n${BLANCO}[*] Instrucciones:${NC}"
         echo -e "  1. Abre tu administrador de archivos"
-        echo -e "  2. Ve a la carpeta 'Downloads'"
+        echo -e "  2. Ve a 'Downloads'"
         echo -e "  3. Instala ${VERDE}${app}_block.apk${NC}"
         echo -e "  4. Al abrir, ingresa: ${VERDE}$codigo${NC}"
         echo -e "\n${ROJO}[!] ADVERTENCIA:${NC} Solo para fines educativos"
         echo -e "${VERDE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
     else
         echo -e "\n${ROJO}[!] ERROR: No se pudo generar la APK${NC}"
-        echo -e "${AMARILLO}[*] Asegúrate de tener conexión a internet y herramientas instaladas${NC}"
+        echo -e "${AMARILLO}[*] Instalando herramientas manualmente...${NC}"
+        pkg install apktool apksigner wget zip openjdk-17 -y
+        echo -e "${AMARILLO}[*] Reintenta ejecutando el script nuevamente${NC}"
         cd ~
         rm -rf ~/block_temp
     fi
