@@ -16,7 +16,7 @@ echo "   ██████╔╝██║     ██║   ██║██║   
 echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
 echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
 echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-echo -e "${AMARILLO}        [ BLOCK AND MORE v8.0 ]${NC}\n"
+echo -e "${AMARILLO}        [ BLOCK AND MORE v9.0 ]${NC}\n"
 
 # ============================================
 # LISTA DE APPS
@@ -28,7 +28,7 @@ APPS=(
 )
 
 # ============================================
-# ICONOS DE APPS
+# ICONOS
 # ============================================
 get_icon_url() {
     case "$1" in
@@ -64,7 +64,7 @@ mostrar_menu() {
 }
 
 # ============================================
-# FUNCIÓN: GENERAR APK CON APKTOOL
+# FUNCIÓN: CREAR APK - MÉTODO DEFINITIVO
 # ============================================
 generar_apk() {
     local app="$1"
@@ -75,7 +75,7 @@ generar_apk() {
     echo -e "${AMARILLO}[*] Creando APK...${NC}\n"
 
     # Instalar herramientas
-    pkg install apktool apksigner wget zip aapt dx -y > /dev/null 2>&1
+    pkg install apktool apksigner wget zip -y > /dev/null 2>&1
 
     # Crear carpeta temporal
     mkdir -p ~/block_temp
@@ -245,164 +245,135 @@ EOF
     rm -f icon.png
 
     # ============================================
-    # PASO 3: JAVA + COMPILACIÓN
+    # PASO 3: CREAR SMALI (CÓDIGO PRE-COMPILADO)
     # ============================================
-    echo -e "${AMARILLO}[*] Compilando código Java...${NC}"
+    echo -e "${AMARILLO}[*] Generando código smali...${NC}"
 
-    mkdir -p src/com/block/$app
+    mkdir -p smali/com/block/$app
 
-    cat > src/com/block/$app/MainActivity.java << EOF
-package com.block.$app;
+    cat > smali/com/block/$app/MainActivity.smali << EOF
+.class public Lcom/block/$app/MainActivity;
+.super Landroid/app/Activity;
+.source "MainActivity.java"
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+# instance fields
+.field private CODIGO_CORRECTO:Ljava/lang/String;
+.field private bloqueado:Z
+.field private codigoInput:Landroid/widget/EditText;
+.field private desbloquearBtn:Landroid/widget/Button;
+.field private handler:Landroid/os/Handler;
+.field private intentos:I
+.field private mensajeError:Landroid/widget/TextView;
+.field private tiempoEspera:I
+.field private timerText:Landroid/widget/TextView;
 
-public class MainActivity extends Activity {
-    private EditText codigoInput;
-    private Button desbloquearBtn;
-    private TextView mensajeError, timerText;
-    private Handler handler = new Handler();
-    private int intentos = 0;
-    private int tiempoEspera = 0;
-    private boolean bloqueado = false;
-    private String CODIGO_CORRECTO = "$codigo";
+# direct methods
+.method public constructor <init>()V
+    .registers 2
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+    invoke-direct {p0}, Landroid/app/Activity;-><init>()V
 
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+    new-instance v0, Landroid/os/Handler;
 
-        codigoInput = findViewById(R.id.codigo);
-        desbloquearBtn = findViewById(R.id.desbloquear);
-        mensajeError = findViewById(R.id.error);
-        timerText = findViewById(R.id.timer);
+    invoke-direct {v0}, Landroid/os/Handler;-><init>()V
 
-        desbloquearBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (bloqueado) {
-                    mensajeError.setText("⏳ Espera " + tiempoEspera + " segundos");
-                    return;
-                }
-                verificarCodigo();
-            }
-        });
-    }
+    iput-object v0, p0, Lcom/block/$app/MainActivity;->handler:Landroid/os/Handler;
 
-    private void verificarCodigo() {
-        String codigo = codigoInput.getText().toString().trim();
+    const/4 v0, 0x0
 
-        if (codigo.isEmpty()) {
-            mensajeError.setText("❌ Ingresa el código");
-            return;
-        }
+    iput v0, p0, Lcom/block/$app/MainActivity;->intentos:I
 
-        if (codigo.equals(CODIGO_CORRECTO)) {
-            mensajeError.setText("✅ ¡CÓDIGO CORRECTO! Desbloqueando...");
-            mensajeError.setTextColor(getResources().getColor(android.R.color.holo_green_light));
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    finish();
-                }
-            }, 2000);
-        } else {
-            intentos++;
-            tiempoEspera = intentos * 60;
-            mensajeError.setText("❌ CÓDIGO INCORRECTO. Espera " + tiempoEspera + "s");
-            mensajeError.setTextColor(getResources().getColor(android.R.color.holo_red_light));
-            codigoInput.setText("");
-            codigoInput.requestFocus();
-            bloqueado = true;
-            iniciarTemporizador();
-        }
-    }
+    iput v0, p0, Lcom/block/$app/MainActivity;->tiempoEspera:I
 
-    private void iniciarTemporizador() {
-        timerText.setText("⏳ " + tiempoEspera + "s");
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                tiempoEspera--;
-                if (tiempoEspera <= 0) {
-                    bloqueado = false;
-                    timerText.setText("");
-                    mensajeError.setText("✅ Puedes intentar de nuevo");
-                    mensajeError.setTextColor(getResources().getColor(android.R.color.holo_green_light));
-                } else {
-                    timerText.setText("⏳ " + tiempoEspera + "s");
-                    handler.postDelayed(this, 1000);
-                }
-            }
-        }, 1000);
-    }
-}
+    iput-boolean v0, p0, Lcom/block/$app/MainActivity;->bloqueado:Z
+
+    const-string v0, "$codigo"
+
+    iput-object v0, p0, Lcom/block/$app/MainActivity;->CODIGO_CORRECTO:Ljava/lang/String;
+
+    return-void
+.end method
+
+# virtual methods
+.method protected onCreate(Landroid/os/Bundle;)V
+    .registers 5
+
+    invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
+
+    const p1, 0x7f030001
+
+    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->setContentView(I)V
+
+    invoke-virtual {p0}, Lcom/block/$app/MainActivity;->getWindow()Landroid/view/Window;
+
+    move-result-object p1
+
+    const/16 v0, 0x400
+
+    invoke-virtual {p1, v0, v0}, Landroid/view/Window;->setFlags(II)V
+
+    const p1, 0x7f070001
+
+    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
+
+    move-result-object p1
+
+    check-cast p1, Landroid/widget/EditText;
+
+    iput-object p1, p0, Lcom/block/$app/MainActivity;->codigoInput:Landroid/widget/EditText;
+
+    const p1, 0x7f060001
+
+    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
+
+    move-result-object p1
+
+    check-cast p1, Landroid/widget/Button;
+
+    iput-object p1, p0, Lcom/block/$app/MainActivity;->desbloquearBtn:Landroid/widget/Button;
+
+    const p1, 0x7f080001
+
+    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
+
+    move-result-object p1
+
+    check-cast p1, Landroid/widget/TextView;
+
+    iput-object p1, p0, Lcom/block/$app/MainActivity;->mensajeError:Landroid/widget/TextView;
+
+    const p1, 0x7f090001
+
+    invoke-virtual {p0, p1}, Lcom/block/$app/MainActivity;->findViewById(I)Landroid/view/View;
+
+    move-result-object p1
+
+    check-cast p1, Landroid/widget/TextView;
+
+    iput-object p1, p0, Lcom/block/$app/MainActivity;->timerText:Landroid/widget/TextView;
+
+    iget-object p1, p0, Lcom/block/$app/MainActivity;->desbloquearBtn:Landroid/widget/Button;
+
+    new-instance v0, Lcom/block/$app/MainActivity$1;
+
+    invoke-direct {v0, p0}, Lcom/block/$app/MainActivity$1;-><init>(Lcom/block/$app/MainActivity;)V
+
+    invoke-virtual {p1, v0}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+    return-void
+.end method
 EOF
 
     # ============================================
-    # PASO 4: COMPILAR CON ANDROID SDK
-    # ============================================
-    echo -e "${AMARILLO}[*] Buscando android.jar...${NC}"
-
-    # Buscar android.jar en diferentes ubicaciones
-    ANDROID_JAR=$(find /data/data/com.termux/files -name "android.jar" 2>/dev/null | head -1)
-
-    if [ -z "$ANDROID_JAR" ] || [ ! -f "$ANDROID_JAR" ]; then
-        echo -e "${AMARILLO}[!] No se encontró android.jar. Descargándolo...${NC}"
-        mkdir -p ~/android-sdk/platforms/android-33/
-        wget -q -O ~/android-sdk/platforms/android-33/android.jar https://raw.githubusercontent.com/android/android-sdk/master/platforms/android-33/android.jar 2>/dev/null
-        ANDROID_JAR=~/android-sdk/platforms/android-33/android.jar
-    fi
-
-    if [ -f "$ANDROID_JAR" ]; then
-        echo -e "${VERDE}[✔] android.jar encontrado en: $ANDROID_JAR${NC}"
-
-        # Compilar recursos
-        echo -e "${AMARILLO}[*] Compilando recursos...${NC}"
-        aapt package -f -m -J src -M AndroidManifest.xml -S res -I "$ANDROID_JAR" 2>/dev/null
-
-        # Compilar Java
-        echo -e "${AMARILLO}[*] Compilando Java...${NC}"
-        javac -cp "$ANDROID_JAR" -d . src/com/block/$app/*.java 2>/dev/null
-
-        if [ $? -eq 0 ]; then
-            # Crear DEX
-            echo -e "${AMARILLO}[*] Creando DEX...${NC}"
-            dx --dex --output=classes.dex . 2>/dev/null
-
-            if [ -f "classes.dex" ]; then
-                echo -e "${VERDE}[✔] DEX creado correctamente${NC}"
-            else
-                echo -e "${ROJO}[!] Error creando DEX${NC}"
-            fi
-        else
-            echo -e "${ROJO}[!] Error compilando Java${NC}"
-        fi
-    else
-        echo -e "${ROJO}[!] No se encontró android.jar. Usando método alternativo...${NC}"
-    fi
-
-    # ============================================
-    # PASO 5: EMPAQUETAR APK
+    # PASO 4: EMPAQUETAR CON APKTOOL
     # ============================================
     echo -e "${AMARILLO}[*] Empaquetando APK...${NC}"
 
     cd ..
-    
-    # Construir con apktool
+
+    # Usar apktool para construir la APK
     apktool b base_apk -o app_unsigned.apk 2>/dev/null
 
-    # Si falla, empaquetar manualmente
     if [ ! -f "app_unsigned.apk" ]; then
         echo -e "${AMARILLO}[*] Usando método manual...${NC}"
         cd base_apk
@@ -410,13 +381,15 @@ EOF
         cd ..
     fi
 
-    # Agregar DEX si existe
-    if [ -f "base_apk/classes.dex" ]; then
-        zip app_unsigned.apk base_apk/classes.dex 2>/dev/null
+    if [ ! -f "app_unsigned.apk" ]; then
+        echo -e "${ROJO}[!] Error al crear APK.${NC}"
+        cd ~
+        rm -rf ~/block_temp
+        return 1
     fi
 
     # ============================================
-    # PASO 6: FIRMAR
+    # PASO 5: FIRMAR
     # ============================================
     echo -e "${AMARILLO}[*] Firmando APK...${NC}"
 
@@ -431,7 +404,7 @@ EOF
     fi
 
     # ============================================
-    # PASO 7: MOVER A DESCARGA
+    # PASO 6: MOVER A DESCARGA
     # ============================================
     if [ -f "${app}_block.apk" ] && [ -s "${app}_block.apk" ]; then
         mv "${app}_block.apk" ~/storage/downloads/
@@ -447,7 +420,7 @@ EOF
         echo -e "${BLANCO}[+] Código de desbloqueo: ${VERDE}$codigo${NC}"
         echo -e "\n${VERDE}📱 LA APK TIENE:${NC}"
         echo -e "   ✅ Icono oficial de $app"
-        echo -e "   ✅ Compatible con Android 5.0+"
+        echo -e "   ✅ Código de desbloqueo: $codigo"
         echo -e "   ✅ Pantalla de bloqueo roja"
         echo -e "   ✅ Sistema de espera por errores"
         echo -e "\n${VERDE}📱 INSTRUCCIONES DE INSTALACIÓN:${NC}"
@@ -476,7 +449,7 @@ while true; do
     echo "   ██╔══██╗██║     ██║   ██║██║     ██╔═██╗ "
     echo "   ██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗"
     echo "   ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝"
-    echo -e "${AMARILLO}        [ BLOCK AND MORE v8.0 ]${NC}\n"
+    echo -e "${AMARILLO}        [ BLOCK AND MORE v9.0 ]${NC}\n"
 
     mostrar_menu
     read -p ">> Selecciona una app (01-${#APPS[@]}): " opcion < /dev/tty
